@@ -1,4 +1,4 @@
-#include "slave.h"
+#include "i2c/slave.h"
 
 I2CSlave::I2CSlave() {
     _i2c = 0;

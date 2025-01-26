@@ -1,7 +1,7 @@
 #ifndef __MASTER_H__
 #define __MASTER_H__
 
-#include "i2c.h"
+#include <i2c/common.h>
 
 class I2CMasterHandler {
 

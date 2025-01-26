@@ -1,7 +1,7 @@
 #ifndef __SLAVE_H__
 #define __SLAVE_H__
 
-#include "i2c.h"
+#include <i2c/common.h>
 
 class I2CSlave {
 

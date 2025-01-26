@@ -1,4 +1,4 @@
-#include <master.h>
+#include <i2c/master.h>
 
 I2CMaster::I2CMaster() {
     _i2c = 0;
