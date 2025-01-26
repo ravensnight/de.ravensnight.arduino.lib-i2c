@@ -1,0 +1,23 @@
+{
+  "name": "Raven's Night lib-i2c",
+  "version": "1.0.0",
+  "description": "Defines a helper for handling I2C / TWI data.",
+  "keywords": "i2c, twi, helper",
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/ravensnight/de.ravensnight.arduino.lib-i2c"
+  }, 
+  "authors":
+  [
+    {
+      "name": "ravensnight",
+      "email": "ravensnight@hoheisels-welt.de",
+      "url": ""
+    }
+  ],
+  "license": "MIT",
+  "dependencies": {
+  },
+  "frameworks": "arduino",
+  "platforms": "atmelavr,espressif32"
+}
