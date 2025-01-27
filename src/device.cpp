@@ -84,3 +84,5 @@ void I2CDevice::i2cRequest() {
 void I2CDevice::i2cReceive(int bytes) {
     I2CDevice::instance.handleReceive(bytes);
 }
+
+I2CDevice I2CDevice::instance = I2CDevice();
