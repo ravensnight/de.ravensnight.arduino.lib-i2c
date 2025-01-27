@@ -1,9 +1,9 @@
-#ifndef __MASTER_H__
-#define __MASTER_H__
+#ifndef __DEVICE_H__
+#define __DEVICE_H__
 
 #include <i2c/common.h>
 
-class I2CMasterHandler {
+class I2CDeviceHandler {
 
     public:
 
@@ -34,7 +34,7 @@ class I2CMasterHandler {
 };
 
 
-class I2CMaster {
+class I2CDevice {
 
     private:
 
@@ -42,7 +42,7 @@ class I2CMaster {
         volatile uint8_t _index = 0;
 
         TwoWire* _i2c = 0;
-        I2CMasterHandler* _handler = 0;
+        I2CDeviceHandler* _handler = 0;
 
         static void i2cReceive(int bytes);
         static void i2cRequest();
@@ -52,13 +52,13 @@ class I2CMaster {
 
     public:
 
-        static I2CMaster instance;
+        static I2CDevice instance;
 
-        I2CMaster();
-        void setup(TwoWire* twi, uint8_t address, I2CMasterHandler* handler);
+        I2CDevice();
+        void setup(TwoWire* twi, uint8_t address, I2CDeviceHandler* handler);
 
         void skipAllAvailable();
 };
 
 
-#endif // __MASTER_H__
+#endif // __DEVICE_H__

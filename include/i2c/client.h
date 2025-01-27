@@ -1,20 +1,20 @@
-#ifndef __SLAVE_H__
-#define __SLAVE_H__
+#ifndef __CLIENT_H__
+#define __CLIENT_H__
 
 #include <i2c/common.h>
 
-class I2CSlave {
+class I2CClient {
 
     private:
         
         TwoWire* _i2c = 0;
         uint8_t _address = 0;
 
-        void I2CSlave::sendData(uint8_t command, uint8_t index, const uint8_t buffer[], uint8_t len);
+        void sendData(uint8_t command, uint8_t index, const uint8_t buffer[], uint8_t len);
 
     public:
 
-        I2CSlave();
+        I2CClient();
 
         void setup(TwoWire* twi, uint8_t address);
 
@@ -27,4 +27,4 @@ class I2CSlave {
         void resetMaster();
 };
 
-#endif // __SLAVE_H__
+#endif // __CLIENT_H__
