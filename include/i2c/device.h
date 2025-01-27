@@ -20,12 +20,12 @@ class I2CDeviceHandler {
         /**
          * Update element from given buffer as sent by slave
          */
-        virtual void setDetails(uint8_t index, const byte buffer[]) = 0;
+        virtual void setDetails(uint8_t index, const uint8_t buffer[]) = 0;
 
         /**
          * Fill the buffer so that I2C Master can sent them to slave.
          */
-        virtual void getDetails(uint8_t index, byte data[]) = 0;
+        virtual void getDetails(uint8_t index, uint8_t data[]) = 0;
 
         /**
          * Reset the internal states.
