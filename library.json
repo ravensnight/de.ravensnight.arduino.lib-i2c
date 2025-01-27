@@ -1,5 +1,5 @@
 {
-  "name": "ravensnight/lib-i2c",
+  "name": "ravensnight lib-i2c",
   "version": "1.0.0",
   "description": "Defines a helper for handling I2C / TWI data.",
   "keywords": "i2c, twi, helper",
