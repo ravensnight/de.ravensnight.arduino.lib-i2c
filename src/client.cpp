@@ -114,3 +114,9 @@ void I2CClient::waitFor(TwoWire* conn, const uint8_t addrs[], uint8_t len, uint1
         
     } while (avl < len);
 }
+
+void I2CClient::skipAllAvailable() {
+    while (this->_i2c->available() > 0) {
+        _i2c->read();
+    }
+}
