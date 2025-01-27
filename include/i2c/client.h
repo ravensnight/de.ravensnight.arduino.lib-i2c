@@ -19,7 +19,7 @@ class I2CClient {
         void setup(TwoWire* twi, uint8_t address);
         void skipAllAvailable();
 
-        uint16_t getState();
+        int16_t getState(uint16_t& state);
 
         int16_t getDetails(uint8_t index, uint8_t buffer[], uint8_t len);
 

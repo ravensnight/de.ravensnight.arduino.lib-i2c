@@ -14,21 +14,21 @@ void I2CClient::setup(TwoWire* twi, uint8_t address) {
     _address = address;    
 }
 
-uint16_t I2CClient::getState() {
-    if (_i2c == 0) return 0xFFFF;
+int16_t I2CClient::getState(uint16_t& state) {
+    if (_i2c == 0) return -1;
 
     sendData(Command::GetState, 0, (uint8_t*)0, 0);
     _i2c->requestFrom(_address, (uint8_t)2);
 
     uint8_t size = _i2c->available(); 
     if (size < 2) {
-        return 0xFFFF;
+        return -1;
     }
 
-    uint16_t result = (_i2c->read() << 8);
-    result |= (_i2c->read());
+    state = (_i2c->read() << 8);
+    state |= (_i2c->read());
 
-    return result;
+    return 2;
 }
 
 int16_t I2CClient::getDetails(uint8_t index, uint8_t buffer[], uint8_t len) {
