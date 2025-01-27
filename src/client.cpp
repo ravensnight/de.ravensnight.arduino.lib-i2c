@@ -31,6 +31,27 @@ int16_t I2CClient::getState(uint16_t& state) {
     return 2;
 }
 
+int16_t I2CClient::getDetails(uint8_t index, uint8_t& value) {
+    uint8_t buffer[1];
+    int16_t res = getDetails(index, buffer, 1);
+
+    if (res == 1) {
+        value = buffer[0];
+    }
+    return res;
+}
+
+int16_t I2CClient::getDetails(uint8_t index, uint16_t& value) {
+    uint8_t buffer[2];
+    int16_t res = getDetails(index, buffer, 2);
+
+    if (res == 1) {
+        value = (buffer[0] << 8);
+        value |= buffer[1];
+    }
+    return res;
+}
+
 int16_t I2CClient::getDetails(uint8_t index, uint8_t buffer[], uint8_t len) {
     if (_i2c == 0) return -1;
 
@@ -43,6 +64,19 @@ int16_t I2CClient::getDetails(uint8_t index, uint8_t buffer[], uint8_t len) {
     }
 
     return _i2c->readBytes(buffer, len);
+}
+
+void I2CClient::setDetails(uint8_t index, uint8_t value) {
+    uint8_t buffer[1] = { value };
+    setDetails(index, buffer, 1);
+}
+
+void I2CClient::setDetails(uint8_t index, uint16_t value) {
+    uint8_t buffer[2];
+    buffer[0] = (uint8_t)(value >> 8);
+    buffer[1] = (uint8_t)(value & 0xFF);
+
+    setDetails(index, buffer, 2);
 }
 
 void I2CClient::setDetails(uint8_t index, const uint8_t buffer[], uint8_t size) {

@@ -21,8 +21,12 @@ class I2CClient {
 
         int16_t getState(uint16_t& state);
 
+        int16_t getDetails(uint8_t index, uint8_t& value);
+        int16_t getDetails(uint8_t index, uint16_t& value);
         int16_t getDetails(uint8_t index, uint8_t buffer[], uint8_t len);
 
+        void setDetails(uint8_t index, uint8_t value);
+        void setDetails(uint8_t index, uint16_t value);
         void setDetails(uint8_t index, const uint8_t buffer[], uint8_t len);
 
         void resetMaster();
