@@ -1,5 +1,5 @@
 {
-  "name": "Raven's Night lib-i2c",
+  "name": "ravensnight/lib-i2c",
   "version": "1.0.0",
   "description": "Defines a helper for handling I2C / TWI data.",
   "keywords": "i2c, twi, helper",
@@ -16,8 +16,14 @@
     }
   ],
   "license": "MIT",
-  "dependencies": {
-  },
+  "dependencies": [
+    {
+      "name": "Raven's Night lib-logging",
+      "version": "1.0.0",
+      "platforms": ["atmelavr", "espressif32"]
+    }
+  ],
+
   "frameworks": "arduino",
-  "platforms": "atmelavr,espressif32"
+  "platforms": [ "atmelavr","espressif32" ]
 }

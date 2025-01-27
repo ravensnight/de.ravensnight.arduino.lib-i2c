@@ -1,4 +1,7 @@
 #include "i2c/client.h"
+#include "Logger.h"
+
+using namespace LOGGING;
 
 I2CClient::I2CClient() {
     _i2c = 0;
@@ -60,4 +63,54 @@ void I2CClient::sendData(uint8_t command, uint8_t index, const uint8_t buffer[],
     _i2c->write(buffer, len);
     _i2c->endTransmission();
 
+}
+
+void I2CClient::scanAll(TwoWire* conn) {
+
+    uint8_t err;
+    for (uint8_t i = 0; i < 127; i++) {
+        conn->beginTransmission(i);
+        err = conn->endTransmission();
+
+        switch (err) {
+            case 0:
+                Logger::defaultLogger().info("Found device at: %x", i);
+                break;
+
+            case 4:
+                Logger::defaultLogger().warn("Unknown error at %x", i);
+                break;
+
+            default:                
+                break;
+        }
+    }
+}
+
+void I2CClient::waitFor(TwoWire* conn, const uint8_t addrs[], uint8_t len, uint16_t d) {
+    bool available[len];
+    uint8_t avl = 0;
+
+    Logger::defaultLogger().info("Wait for I2C addresses.");
+
+    for (uint8_t i = 0; i < len; i++) {
+        available[i] = false;
+    }
+
+    do {
+        avl = 0;
+        for (uint8_t i = 0; i < len; i++) {
+            if (available[i]) {
+                avl++;
+            } else {
+                conn->beginTransmission(addrs[i]);
+                if (conn->endTransmission() == 0) {
+                    available[i] = true;
+                    avl++;
+                }
+            }
+        }
+        delay(d);
+        
+    } while (avl < len);
 }

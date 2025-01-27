@@ -25,6 +25,10 @@ class I2CClient {
         void setDetails(uint8_t index, const uint8_t buffer[], uint8_t len);
 
         void resetMaster();
+
+        static void waitFor(TwoWire* conn, uint8_t addrs[], uint8_t size, uint16_t delayTime);
+        static void scanAll(TwoWire* conn);
+
 };
 
 #endif // __CLIENT_H__
