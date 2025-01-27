@@ -30,7 +30,7 @@ class I2CDeviceHandler {
         /**
          * Reset the internal states.
          */
-        virtual void reset();
+        virtual void reset() = 0;
 };
 
 
