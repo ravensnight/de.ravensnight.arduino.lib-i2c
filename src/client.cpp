@@ -18,9 +18,7 @@ int16_t I2CClient::getState(uint16_t& state) {
     if (_i2c == 0) return -1;
 
     sendData(Command::GetState, 0, (uint8_t*)0, 0);
-    _i2c->requestFrom(_address, (uint8_t)2);
-
-    uint8_t size = _i2c->available(); 
+    uint8_t size = _i2c->requestFrom(_address, (uint8_t)2); 
     if (size < 2) {
         return -1;
     }
@@ -90,11 +88,14 @@ void I2CClient::resetMaster() {
 void I2CClient::sendData(uint8_t command, uint8_t index, const uint8_t buffer[], uint8_t len) {
     if (_i2c == 0) return;
 
+    skipAllAvailable();
     uint8_t reg = (command << 6) | (index & 0x3F);
 
     _i2c->beginTransmission(_address);
     _i2c->write(reg);
-    _i2c->write(buffer, len);
+    if (len > 0) {
+        _i2c->write(buffer, len);
+    }
     _i2c->endTransmission();
 
 }
