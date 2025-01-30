@@ -18,7 +18,7 @@ int16_t I2CClient::getState(uint16_t& state) {
     if (_i2c == 0) return -1;
 
     sendData(Command::GetState, 0, (uint8_t*)0, 0);
-    uint8_t size = _i2c->requestFrom(_address, (uint8_t)2); 
+    uint8_t size = _i2c->requestFrom(_address, (uint8_t)2, (uint8_t)true); 
     if (size < 2) {
         return -1;
     }
