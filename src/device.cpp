@@ -40,12 +40,13 @@ void I2CDevice::handleRequest() {
 }
 
 void I2CDevice::handleReceive(int bytes) {
-    if (_handler == 0) return;
+    if ((_handler == 0) || (bytes < 0)) return;
+    size_t b = (size_t)bytes;
 
-    uint8_t buffer[bytes];
-    size_t r = _i2c->readBytes(buffer, bytes);
+    uint8_t buffer[b];
+    size_t r = _i2c->readBytes(buffer, b);
 
-    if (r < bytes) {
+    if (r < b) {
         return;
     }
 
@@ -60,7 +61,7 @@ void I2CDevice::handleReceive(int bytes) {
             _index = buffer[0] & 0x3F;
 
             int8_t len = _handler->getDetailsSize(_index);
-            if ((len <= 0) || (len > bytes + 1)) {
+            if ((len <= 0) || (len > (bytes + 1))) {
                 return;
             }
 
@@ -72,7 +73,6 @@ void I2CDevice::handleReceive(int bytes) {
             _handler->reset();
         }
     }  
-
 }
 
 void I2CDevice::skipAllAvailable() {
