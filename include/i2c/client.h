@@ -9,6 +9,7 @@ class I2CClient {
         
         TwoWire* _i2c = 0;
         uint8_t _address = 0;
+        uint8_t _stop = 0;
 
         void sendData(uint8_t command, uint8_t index, const uint8_t buffer[], uint8_t len);
 
@@ -17,6 +18,7 @@ class I2CClient {
         I2CClient();
 
         void setup(TwoWire* twi, uint8_t address);
+        void sendStopWithRequest(bool stop);
         void skipAllAvailable();
 
         int16_t getState(uint16_t& state);
