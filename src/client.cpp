@@ -59,7 +59,7 @@ int16_t I2CClient::getDetails(uint8_t index, uint8_t buffer[], uint8_t len) {
 
     skipAllAvailable();
 
-    sendData(Command::GetState, 0, (uint8_t*)0, 0);
+    sendData(Command::GetDetails, index, (uint8_t*)0, 0);
     uint8_t size = _i2c->requestFrom(_address, (uint8_t)len, _stop);
     
     if (size < len) {
