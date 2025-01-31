@@ -42,32 +42,36 @@ void I2CDevice::handleRequest() {
 void I2CDevice::handleReceive(int bytes) {
     if (_handler == 0) return;
 
-  uint8_t cmd;
+    uint8_t buffer[bytes];
+    size_t r = _i2c->readBytes(buffer, bytes);
 
-  if (bytes > 0) {    
-    _command = (Command)(cmd >> 6);
-    _index = 0;
-
-    if (_command == Command::GetDetails) {
-        _index = cmd & 0x3F;
+    if (r < bytes) {
+        return;
     }
-    else if (_command == Command::SetDetails) {
-        _index = cmd & 0x3F;
 
-        int8_t len = _handler->getDetailsSize(_index);
-        if (len <= 0) return;
+    if (r > 0) {    
+        _command = (Command)(buffer[0] >> 6);
+        _index = 0;
 
-        uint8_t buffer[len];
-        size_t r = _i2c->readBytes(buffer, len);
-
-        if (r == (uint8_t)len) {
-            _handler->setDetails(_index, buffer);
+        if (_command == Command::GetDetails) {
+            _index = buffer[0] & 0x3F;
         }
-    }
-    else if (_command == Command::Reset) {
-        _handler->reset();
-    }
-  }  
+        else if (_command == Command::SetDetails) {
+            _index = buffer[0] & 0x3F;
+
+            int8_t len = _handler->getDetailsSize(_index);
+            if ((len <= 0) || (len > bytes + 1)) {
+                return;
+            }
+
+            if (r == (uint8_t)len) {
+                _handler->setDetails(_index, buffer + 1);
+            }
+        }
+        else if (_command == Command::Reset) {
+            _handler->reset();
+        }
+    }  
 
 }
 
