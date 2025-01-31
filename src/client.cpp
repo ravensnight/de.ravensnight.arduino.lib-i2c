@@ -47,7 +47,7 @@ int16_t I2CClient::getDetails(uint8_t index, uint16_t& value) {
     uint8_t buffer[2];
     int16_t res = getDetails(index, buffer, 2);
 
-    if (res == 1) {
+    if (res == 2) {
         value = (buffer[0] << 8);
         value |= buffer[1];
     }
