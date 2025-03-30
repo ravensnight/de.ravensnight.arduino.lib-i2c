@@ -114,11 +114,11 @@ void I2CClient::scanAll(TwoWire* conn) {
 
         switch (err) {
             case 0:
-                Logger::instance.info("Found device at: %x", i);
+                Logger::info("Found device at: %x", i);
                 break;
 
             case 4:
-                Logger::instance.warn("Unknown error at %x", i);
+                Logger::warn("Unknown error at %x", i);
                 break;
 
             default:                
@@ -131,7 +131,7 @@ void I2CClient::waitFor(TwoWire* conn, const uint8_t addrs[], uint8_t len, uint1
     bool available[len];
     uint8_t avl = 0;
 
-    Logger::instance.info("Wait for I2C addresses.");
+    Logger::info("Wait for I2C addresses.");
 
     for (uint8_t i = 0; i < len; i++) {
         available[i] = false;
