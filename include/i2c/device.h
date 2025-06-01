@@ -3,6 +3,8 @@
 
 #include <i2c/common.h>
 
+namespace ravensnight::i2c {
+
 class I2CDeviceHandler {
 
     public:
@@ -60,5 +62,6 @@ class I2CDevice {
         void skipAllAvailable();
 };
 
+}
 
 #endif // __DEVICE_H__

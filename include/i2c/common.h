@@ -3,6 +3,8 @@
 
 #include <Wire.h>
 
+namespace ravensnight::i2c {
+
 /**
  * This I2C Library expects a single byte to be sent as request.
  * the following requests are supported:
@@ -21,5 +23,6 @@ typedef enum {
 
 } Command;
 
+}
 
 #endif // __I2C_H__

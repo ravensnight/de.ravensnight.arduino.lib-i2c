@@ -1,7 +1,8 @@
 #include "i2c/client.h"
 #include <Logger.h>
 
-using namespace LOGGING;
+using namespace ravensnight::logging;
+using namespace ravensnight::i2c;
 
 I2CClient::I2CClient() {
     _i2c = 0;

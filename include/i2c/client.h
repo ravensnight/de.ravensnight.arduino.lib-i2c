@@ -3,6 +3,7 @@
 
 #include <i2c/common.h>
 
+namespace ravensnight::i2c {
 class I2CClient {
 
     private:
@@ -37,5 +38,7 @@ class I2CClient {
         static void scanAll(TwoWire* conn);
 
 };
+
+}
 
 #endif // __CLIENT_H__

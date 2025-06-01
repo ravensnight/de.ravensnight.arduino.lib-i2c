@@ -1,5 +1,7 @@
 #include <i2c/device.h>
 
+using namespace ravensnight::i2c;
+
 I2CDevice::I2CDevice() {
     _i2c = 0;
     _handler = 0;
