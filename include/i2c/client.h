@@ -1,13 +1,17 @@
 #ifndef __CLIENT_H__
 #define __CLIENT_H__
 
+#include <ClassLogger.h>
 #include <i2c/common.h>
 
+using namespace ravensnight::logging;
 namespace ravensnight::i2c {
 class I2CClient {
 
     private:
-        
+    
+        static ClassLogger _logger;
+
         TwoWire* _i2c = 0;
         uint8_t _address = 0;
         uint8_t _stop = 0;

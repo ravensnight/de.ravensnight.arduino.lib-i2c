@@ -1,5 +1,5 @@
-#include "i2c/client.h"
-#include <Logger.h>
+#include <i2c/client.h>
+#include <i2c/LoggerConfig.h>
 
 using namespace ravensnight::logging;
 using namespace ravensnight::i2c;
@@ -115,11 +115,11 @@ void I2CClient::scanAll(TwoWire* conn) {
 
         switch (err) {
             case 0:
-                Logger::info("Found device at: %x", i);
+                _logger.info("Found device at: %x", i);
                 break;
 
             case 4:
-                Logger::warn("Unknown error at %x", i);
+                _logger.warn("Unknown error at %x", i);
                 break;
 
             default:                
@@ -132,7 +132,7 @@ void I2CClient::waitFor(TwoWire* conn, const uint8_t addrs[], uint8_t len, uint1
     bool available[len];
     uint8_t avl = 0;
 
-    Logger::info("Wait for I2C addresses.");
+    _logger.info("Wait for I2C addresses.");
 
     for (uint8_t i = 0; i < len; i++) {
         available[i] = false;
@@ -161,3 +161,5 @@ void I2CClient::skipAllAvailable() {
         _i2c->read();
     }
 }
+
+ClassLogger I2CClient::_logger(LC_I2C);
