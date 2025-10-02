@@ -1,4 +1,4 @@
-#include <i2c/device.h>
+#include <i2c/I2CDevice.h>
 
 using namespace ravensnight::i2c;
 
@@ -9,9 +9,26 @@ I2CDevice::I2CDevice() {
     _index = 0;
 }
 
-void I2CDevice::setup(TwoWire* twi, uint8_t address, I2CDeviceHandler* handler) {
+bool I2CDevice::setup(TwoWire* twi, I2CAddressProvider& address, I2CDeviceHandler* handler) {
     if (twi == 0) {
         return;
+    }
+
+    int16_t res = -1;
+    address.begin();
+    for (uint8_t i = 0; i < address.getNumberOfTries(); i++) {
+
+        res = address.getAddress();
+        if (res >= 0) {
+            break;
+        }
+
+        _delay_ms(address.getRetryDelay());
+    }
+    address.end();
+
+    if ((res < 0) || (res > 255)) {
+        return false;
     }
 
     _i2c = twi;
@@ -19,7 +36,9 @@ void I2CDevice::setup(TwoWire* twi, uint8_t address, I2CDeviceHandler* handler) 
 
     _i2c->onReceive(I2CDevice::i2cReceive);
     _i2c->onRequest(I2CDevice::i2cRequest);
-    _i2c->begin(address);
+    _i2c->begin(res);
+
+    return true;
 }
 
 void I2CDevice::handleRequest() {

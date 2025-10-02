@@ -1,25 +1,25 @@
-#include <i2c/client.h>
+#include <i2c/I2CController.h>
 #include <i2c/LoggerConfig.h>
 
 using namespace ravensnight::logging;
 using namespace ravensnight::i2c;
 
-I2CClient::I2CClient() {
+I2CController::I2CController() {
     _i2c = 0;
 }
 
-void I2CClient::setup(TwoWire* twi, uint8_t address) {
+void I2CController::setup(TwoWire* twi, uint8_t address) {
     if (twi == 0) return;
 
     _i2c = twi;
     _address = address;    
 }
 
-void I2CClient::sendStopWithRequest(bool stop) {
+void I2CController::sendStopWithRequest(bool stop) {
     _stop = stop ? 1 : 0;
 }
 
-int16_t I2CClient::getState(uint16_t& state) {
+int16_t I2CController::getState(uint16_t& state) {
     if (_i2c == 0) return -1;
 
     sendData(Command::GetState, 0, (uint8_t*)0, 0);
@@ -34,7 +34,7 @@ int16_t I2CClient::getState(uint16_t& state) {
     return 2;
 }
 
-int16_t I2CClient::getDetails(uint8_t index, uint8_t& value) {
+int16_t I2CController::getDetails(uint8_t index, uint8_t& value) {
     uint8_t buffer[1];
     int16_t res = getDetails(index, buffer, 1);
 
@@ -44,7 +44,7 @@ int16_t I2CClient::getDetails(uint8_t index, uint8_t& value) {
     return res;
 }
 
-int16_t I2CClient::getDetails(uint8_t index, uint16_t& value) {
+int16_t I2CController::getDetails(uint8_t index, uint16_t& value) {
     uint8_t buffer[2];
     int16_t res = getDetails(index, buffer, 2);
 
@@ -55,7 +55,7 @@ int16_t I2CClient::getDetails(uint8_t index, uint16_t& value) {
     return res;
 }
 
-int16_t I2CClient::getDetails(uint8_t index, uint8_t buffer[], uint8_t len) {
+int16_t I2CController::getDetails(uint8_t index, uint8_t buffer[], uint8_t len) {
     if (_i2c == 0) return -1;
 
     skipAllAvailable();
@@ -70,12 +70,12 @@ int16_t I2CClient::getDetails(uint8_t index, uint8_t buffer[], uint8_t len) {
     return _i2c->readBytes(buffer, len);
 }
 
-void I2CClient::setDetails(uint8_t index, uint8_t value) {
+void I2CController::setDetails(uint8_t index, uint8_t value) {
     uint8_t buffer[1] = { value };
     setDetails(index, buffer, 1);
 }
 
-void I2CClient::setDetails(uint8_t index, uint16_t value) {
+void I2CController::setDetails(uint8_t index, uint16_t value) {
     uint8_t buffer[2];
     buffer[0] = (uint8_t)(value >> 8);
     buffer[1] = (uint8_t)(value & 0xFF);
@@ -83,15 +83,15 @@ void I2CClient::setDetails(uint8_t index, uint16_t value) {
     setDetails(index, buffer, 2);
 }
 
-void I2CClient::setDetails(uint8_t index, const uint8_t buffer[], uint8_t size) {
+void I2CController::setDetails(uint8_t index, const uint8_t buffer[], uint8_t size) {
     sendData(Command::SetDetails, index, buffer, size);
 }
 
-void I2CClient::resetMaster() {
+void I2CController::resetDevice() {
     sendData(Command::Reset, 0, (uint8_t*)0, 0);
 }
 
-void I2CClient::sendData(uint8_t command, uint8_t index, const uint8_t buffer[], uint8_t len) {
+void I2CController::sendData(uint8_t command, uint8_t index, const uint8_t buffer[], uint8_t len) {
     if (_i2c == 0) return;
 
     skipAllAvailable();
@@ -106,7 +106,7 @@ void I2CClient::sendData(uint8_t command, uint8_t index, const uint8_t buffer[],
 
 }
 
-void I2CClient::scanAll(TwoWire* conn) {
+void I2CController::scanAll(TwoWire* conn) {
 
     uint8_t err;
     for (uint8_t i = 0; i < 127; i++) {
@@ -128,7 +128,7 @@ void I2CClient::scanAll(TwoWire* conn) {
     }
 }
 
-void I2CClient::waitFor(TwoWire* conn, const uint8_t addrs[], uint8_t len, uint16_t d) {
+void I2CController::waitFor(TwoWire* conn, const uint8_t addrs[], uint8_t len, uint16_t d) {
     bool available[len];
     uint8_t avl = 0;
 
@@ -156,10 +156,10 @@ void I2CClient::waitFor(TwoWire* conn, const uint8_t addrs[], uint8_t len, uint1
     } while (avl < len);
 }
 
-void I2CClient::skipAllAvailable() {
+void I2CController::skipAllAvailable() {
     while (this->_i2c->available() > 0) {
         _i2c->read();
     }
 }
 
-ClassLogger I2CClient::_logger(LC_I2C);
+ClassLogger I2CController::_logger(LC_I2C);
