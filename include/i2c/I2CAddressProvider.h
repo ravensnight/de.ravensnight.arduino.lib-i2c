@@ -10,7 +10,7 @@ namespace ravensnight::i2c {
         public:
 
             /** Opens the acquiry session. This function is called by the device in order to initiate the retrieval process. */
-            virtual void begin();
+            virtual void begin() = 0;
 
             /**
              * Provides the address for a device / I2C slave.
@@ -30,7 +30,7 @@ namespace ravensnight::i2c {
             virtual uint16_t getRetryDelay() = 0;
 
             /** Closes the acquiry session. This function is called by the device in order stop all resources used for retrieval. */
-            virtual void end();
+            virtual void end() = 0;
 
     };
 

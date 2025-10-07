@@ -2,11 +2,10 @@
 
 using namespace ravensnight::i2c;
 
-I2CAutoAddress::I2CAutoAddress(TwoWire* twi, uint8_t addr, uint8_t numOfTries, uint16_t delay) {
+I2CAutoAddress::I2CAutoAddress(TwoWire* twi, uint8_t addr, uint16_t reg) {
     _twi = twi;
     _address = addr;
-    _delay = delay;
-    _tries = numOfTries;
+    _register = reg;
 }
 
 void I2CAutoAddress::begin() {
@@ -25,9 +24,14 @@ int16_t I2CAutoAddress::getAddress() {
         _twi->read();
     }
 
+    // send the register
+    _twi->beginTransmission(_address);
+    _twi->write(_register);
+    _twi->endTransmission();
+
     // send the address request
     int16_t result = -1;
-    _twi->requestFrom(_address, 1);
+    _twi->requestFrom((int)_address, (int)1);
     while (_twi->available()) {
         if (result < 0) {
             result = _twi->read();
@@ -37,6 +41,14 @@ int16_t I2CAutoAddress::getAddress() {
     } 
 
     return result;
+}
+
+void I2CAutoAddress::setNumberOfTries(uint8_t tries) {
+    _tries = tries;
+}
+
+void I2CAutoAddress::setRetryDelay(uint16_t delay) {
+    _delay = delay;
 }
 
 uint8_t I2CAutoAddress::getNumberOfTries() {

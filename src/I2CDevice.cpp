@@ -65,13 +65,13 @@ void I2CDevice::handleReceive(int bytes) {
     size_t b = (size_t)bytes;
 
     uint8_t buffer[b];
-    size_t r = _i2c->readBytes(buffer, b);
+    size_t avail = _i2c->readBytes(buffer, b);
 
-    if (r < b) {
+    if (avail < b) {
         return;
     }
 
-    if (r > 0) {    
+    if (avail > 0) {    
         _command = (Command)(buffer[0] >> 6);
         _index = 0;
 
@@ -81,14 +81,12 @@ void I2CDevice::handleReceive(int bytes) {
         else if (_command == Command::SetDetails) {
             _index = buffer[0] & 0x3F;
 
-            int8_t len = _handler->getDetailsSize(_index);
-            if ((len <= 0) || (len > (bytes + 1))) {
+            int8_t len = _handler->getDetailsSize(_index);      // get size expected
+            if ((len <= 0) || ((avail - 1) >= len)) {           // check size expected being less then available.
                 return;
             }
 
-            if (r == (uint8_t)len) {
-                _handler->setDetails(_index, buffer + 1);
-            }
+            _handler->setDetails(_index, buffer + 1);
         }
         else if (_command == Command::Reset) {
             _handler->reset();

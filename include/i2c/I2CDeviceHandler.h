@@ -20,12 +20,12 @@ namespace ravensnight::i2c {
             virtual int8_t getDetailsSize(uint8_t index) = 0;
 
             /**
-             * Update element from given buffer as sent by slave
+             * Update element from given buffer as sent by controller
              */
             virtual void setDetails(uint8_t index, const uint8_t buffer[]) = 0;
 
             /**
-             * Fill the buffer so that I2C Master can sent them to slave.
+             * Fill the buffer so that I2C Device can sent data to its controller.
              */
             virtual void getDetails(uint8_t index, uint8_t data[]) = 0;
 
