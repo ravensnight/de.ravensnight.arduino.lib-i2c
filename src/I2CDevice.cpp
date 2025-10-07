@@ -11,7 +11,7 @@ I2CDevice::I2CDevice() {
 
 bool I2CDevice::setup(TwoWire* twi, I2CAddressProvider& address, I2CDeviceHandler* handler) {
     if (twi == 0) {
-        return;
+        return false;
     }
 
     int16_t res = -1;
@@ -82,7 +82,7 @@ void I2CDevice::handleReceive(int bytes) {
             _index = buffer[0] & 0x3F;
 
             int8_t len = _handler->getDetailsSize(_index);      // get size expected
-            if ((len <= 0) || ((avail - 1) >= len)) {           // check size expected being less then available.
+            if ((len <= 0) || (len < (uint8_t)(avail - 1))) {           // check size expected being less then available.
                 return;
             }
 
