@@ -1,6 +1,6 @@
 {
   "name": "ravensnight lib-i2c",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Defines a helper for handling I2C / TWI data.",
   "keywords": "i2c, twi, helper",
   "repository" : {
