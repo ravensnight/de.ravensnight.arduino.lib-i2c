@@ -23,7 +23,7 @@ bool I2CDevice::setup(TwoWire* twi, I2CAddressProvider& address, I2CDeviceHandle
             break;
         }
 
-        _delay_ms(address.getRetryDelay());
+        delay(address.getRetryDelay());
     }
     address.end();
 
