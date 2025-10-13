@@ -17,15 +17,21 @@ void I2CClient::skipAllAvailable() {
 int16_t I2CClient::send(const uint8_t* buffer, uint8_t len) {
     if (_i2c == 0) return -1;
 
-    size_t result = 0;
+    size_t size = 0;
+    uint8_t err = 0;
+
     skipAllAvailable();
 
     _i2c->beginTransmission(_hostAddr);
-    result = _i2c->write(buffer, len);
-    _i2c->endTransmission(1); // send stop
+    size = _i2c->write(buffer, len);
+    err = _i2c->endTransmission(1); // send stop
 
-    _logger.trace("Sent %d bytes to host.", result);
-    return result;
+    _logger.trace("Sent %d bytes to host. Err-Code: %d", size, err);
+    if (err != 0) {
+        return -1;
+    }
+
+    return size;
 }
 
 int16_t I2CClient::request(const uint8_t* params, uint8_t paramsLen, uint8_t* response, uint8_t responseLen) {
@@ -33,10 +39,10 @@ int16_t I2CClient::request(const uint8_t* params, uint8_t paramsLen, uint8_t* re
 
     size_t size = 0;
     uint8_t err = 0;
+
     skipAllAvailable();
 
     if ((params != 0) && (paramsLen > 0)) {
-
         _i2c->beginTransmission(_hostAddr);
         size = _i2c->write(params, paramsLen);        
         err = _i2c->endTransmission(false); // do not send stop, wait for response.
