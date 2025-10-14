@@ -13,7 +13,7 @@ namespace ravensnight::i2c {
              * Parse some data received via I2C and calculate a new state.
              * @return true, if new state is valid / data could be parsed successfully
              */
-            virtual bool parse(Stream& params, size_t length) = 0;
+            virtual bool parse(const uint8_t* buffer, size_t length) = 0;
             
             /**
              * Return true, if the data being addressed by previous parse function can be read.
@@ -22,8 +22,9 @@ namespace ravensnight::i2c {
 
             /**
              * Send some output data matching the internal current state.
+             * @return the number of bytes filled in buffer.
              */
-            virtual void read(Print& out) = 0;
+            virtual int16_t read(uint8_t* buffer, size_t maxLen) = 0;
     };
 
 }

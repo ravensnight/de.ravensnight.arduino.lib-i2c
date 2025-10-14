@@ -10,14 +10,25 @@
 using namespace ravensnight::logging;
 namespace ravensnight::i2c {
 
+    #ifndef I2C_RECEIVE_BUFFER_SIZE
+    #define I2C_RECEIVE_BUFFER_SIZE 64
+    #endif
+
+    #ifndef I2C_RESPONSE_BUFFER_SIZE
+    #define I2C_RESPONSE_BUFFER_SIZE 64
+    #endif 
+
     class I2CHost {
 
         private:
 
             static ClassLogger _logger;
 
-            TwoWire* _i2c = 0;
+            TwoWire*        _i2c = 0;            
             I2CHostHandler* _handler = 0;
+            uint8_t         _receiveBuffer[I2C_RECEIVE_BUFFER_SIZE] = { 0 };
+            uint8_t         _responseBuffer[I2C_RESPONSE_BUFFER_SIZE] = { 0 };
+            bool            _useChecksum = true;
 
             /**
              * listener methods.
@@ -31,11 +42,13 @@ namespace ravensnight::i2c {
             void i2cReceive(int bytes);
             void i2cRequest();            
 
+            void setUseChecksum(bool use);
+            bool getUseChecksum();
+
             /**
              * Skip data from buffer.
              */
             void skipAll();
-
 
         protected:
 

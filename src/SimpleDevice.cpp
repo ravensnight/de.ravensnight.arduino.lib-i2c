@@ -8,17 +8,10 @@ SimpleDevice::SimpleDevice(SimpleDeviceModel* model) {
     _index = 0;
 }
 
-bool SimpleDevice::parse(Stream& is, size_t bytes) {
+bool SimpleDevice::parse(const uint8_t* buffer, size_t bytes) {
     if ((_model == 0) || (bytes < 0)) return false;
 
-    uint8_t buffer[bytes];
-    size_t avail = is.readBytes(buffer, bytes);
-
-    if (avail < bytes) {
-        return false;
-    }
-
-    if (avail > 0) {    
+    if (bytes > 0) {    
         _command = (Command)(buffer[0] >> 6);
         _index = 0;
 
@@ -36,8 +29,8 @@ bool SimpleDevice::parse(Stream& is, size_t bytes) {
             case Command::SetDetails: {
                 _index = buffer[0] & 0x3F;
 
-                int8_t len = _model->getDetailsSize(_index);      // get size expected
-                if ((len <= 0) || (len < (uint8_t)(avail - 1))) {           // check size expected being less then available.
+                int8_t len = _model->getDetailsSize(_index);            // get size expected
+                if ((len <= 0) || (len < (uint8_t)(bytes - 1))) {       // check size expected being less then available.
                     return false;
                 }
 
@@ -71,25 +64,28 @@ bool SimpleDevice::canRead() {
     };
 }
 
-void SimpleDevice::read(Print& out) {
+int16_t SimpleDevice::read(uint8_t* buffer, size_t maxLen) {
     if (_model == 0) return;
 
     switch (_command) {
         case Command::GetState: {
+            if (maxLen < 2) {
+                return -1;                
+            }
+
             uint16_t state = _model->getState();
-            out.write(0x0FF & (state >> 8));
-            out.write(0x0FF & state);
+            buffer[0] = 0x0FF & (state >> 8);
+            buffer[1] = 0x0FF & state;
             break;
         }
 
         case Command::GetDetails: {
             int8_t len = _model->getDetailsSize(_index);
-            if (len <= 0) return;
+            if ((len <= 0) || (len > maxLen)) {
+                return -1;
+            }
 
-            uint8_t buffer[len];
             _model->getDetails(_index, buffer);
-            out.write(buffer, len);
-
             break;
         }
 

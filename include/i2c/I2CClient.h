@@ -17,11 +17,18 @@ namespace ravensnight::i2c {
             uint8_t _hostAddr = 0;
             TwoWire* _i2c = 0;
 
+            bool _useChecksum;
+
             void skipAllAvailable();
+
+            int16_t transmit(const uint8_t* buffer, uint8_t size, bool stop);
 
         public:
 
             I2CClient(TwoWire* twi, uint8_t hostAddr);
+
+            void setUseChecksum(bool checksum);
+            bool getUseChecksum();
 
             /**
              * Send some data buffer to the client.
