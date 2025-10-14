@@ -65,7 +65,7 @@ bool SimpleDevice::canRead() {
 }
 
 int16_t SimpleDevice::read(uint8_t* buffer, size_t maxLen) {
-    if (_model == 0) return;
+    if (_model == 0) return -1;
 
     switch (_command) {
         case Command::GetState: {
@@ -76,20 +76,22 @@ int16_t SimpleDevice::read(uint8_t* buffer, size_t maxLen) {
             uint16_t state = _model->getState();
             buffer[0] = 0x0FF & (state >> 8);
             buffer[1] = 0x0FF & state;
-            break;
+            
+            return 2;
         }
 
         case Command::GetDetails: {
             int8_t len = _model->getDetailsSize(_index);
-            if ((len <= 0) || (len > maxLen)) {
+            if ((len <= 0) || (len > (int8_t)maxLen)) {
                 return -1;
             }
 
             _model->getDetails(_index, buffer);
-            break;
+            return len;
         }
 
         default:
-            break;
+            return -1;
     }
+
 }

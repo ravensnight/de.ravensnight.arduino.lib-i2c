@@ -89,7 +89,6 @@ int16_t I2CClient::request(const uint8_t* params, uint8_t paramsLen, uint8_t* re
     _i2c->requestFrom(_hostAddr, len, (uint8_t)true);
 
     int b;
-    uint8_t i = 0;
     for (uint8_t i = 0; i < len; i++) {
         b = _i2c->read();
         if (b < 0) {
