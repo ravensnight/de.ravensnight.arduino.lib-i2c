@@ -18,9 +18,7 @@ namespace ravensnight::i2c {
             void update(uint8_t val);
             void update(const uint8_t* buffe, size_t len);
 
-            void finalize();
-
-            uint8_t get();
+            void build(uint8_t& checksum);
     };
 
 }

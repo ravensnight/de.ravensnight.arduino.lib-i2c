@@ -14,7 +14,7 @@ namespace ravensnight::i2c {
         
             static ClassLogger _logger;
 
-            I2CClient& _i2c;
+            I2CClient& _client;
             uint8_t getReg(Command cmd, int index);
 
         public:

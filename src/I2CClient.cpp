@@ -29,22 +29,23 @@ int16_t I2CClient::transmit(const uint8_t* buffer, uint8_t size, bool stopBit) {
 
     size_t sent = 0;
     uint8_t res = 0;
-    I2CChecksum checksum;
 
     skipAllAvailable();
 
+    _checksum.reset();
     _i2c->beginTransmission(_hostAddr);    
 
     for (uint8_t i = 0; i < size; i++) {
         res = _i2c->write(buffer[i]); 
         if (res == 0) break;
 
-        if (_useChecksum) checksum.update(buffer[i]);
+        _checksum.update(buffer[i]);
         sent++;
     }
 
     if ((sent == size) && _useChecksum) {
-        _i2c->write(checksum.get());
+        _checksum.build(res);
+        _i2c->write(res);
     }
 
     res = _i2c->endTransmission((uint8_t)stopBit);
@@ -52,7 +53,7 @@ int16_t I2CClient::transmit(const uint8_t* buffer, uint8_t size, bool stopBit) {
     _logger.trace("Sent %d bytes to host. result: %d", sent, res);
 
     if (res != 0) {
-        _i2c->endTransmission(true);
+        _i2c->endTransmission((uint8_t)true);
         return -1;
     }
 
@@ -65,8 +66,6 @@ int16_t I2CClient::send(const uint8_t* buffer, uint8_t len) {
 
 int16_t I2CClient::request(const uint8_t* params, uint8_t paramsLen, uint8_t* response, uint8_t responseLen) {
     if (_i2c == 0) return -1;
-
-    I2CChecksum _checksum;
 
     int16_t res = 0;
     size_t  len = responseLen;
@@ -85,27 +84,29 @@ int16_t I2CClient::request(const uint8_t* params, uint8_t paramsLen, uint8_t* re
     }
 
     // request and read the data.
-    _logger.trace("Request response data.");
-    _i2c->requestFrom(_hostAddr, len, (uint8_t)true);
 
-    int b;
+    _logger.trace("Request response data.");
+    _i2c->requestFrom(_hostAddr, (uint8_t)len, (uint8_t)1);
+
+    _checksum.reset();
     for (uint8_t i = 0; i < len; i++) {
-        b = _i2c->read();
-        if (b < 0) {
+        res = _i2c->read();
+        if (res < 0) {
             return -1;
         }
 
-        response[i] = (uint8_t)b;
-        if (_useChecksum && (i < responseLen)) {     // anything except the checksum byte
-            _checksum.update(b);
+        response[i] = (uint8_t)res;
+        if (i < responseLen) {     // anything except the checksum byte
+            _checksum.update(res);
         }
     }
 
     if (_useChecksum) {
-        _checksum.finalize();
+        uint8_t checksum = 0;        
+        _checksum.build(checksum);
 
-        if (_checksum.get() != (uint8_t)b) {
-            _logger.error("Checksum invalid. %d != %d", _checksum.get(), b);
+        if (checksum != (uint8_t)res) { // check against the last byte read
+            _logger.error("Checksum invalid. %d != %d", checksum, res);
             return -1;
         }
     }

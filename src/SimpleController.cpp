@@ -4,7 +4,7 @@
 using namespace ravensnight::logging;
 using namespace ravensnight::i2c;
 
-SimpleController::SimpleController(I2CClient& client) : _i2c(client) {
+SimpleController::SimpleController(I2CClient& client) : _client(client) {
 }
 
 uint8_t SimpleController::getReg(Command cmd, int index) {
@@ -17,7 +17,7 @@ int16_t SimpleController::getState(uint16_t& state) {
     uint8_t reqData[] = { getReg(Command::GetState, 0) };
     uint8_t resData[2];
 
-    if (_i2c.request(reqData, 1, resData, 2) == 2) {
+    if (_client.request(reqData, 1, resData, 2) == 2) {
         state = (resData[0] << 8);
         state |= (resData[1]);
         return 2;
@@ -49,7 +49,7 @@ int16_t SimpleController::getDetails(uint8_t index, uint16_t& value) {
 
 int16_t SimpleController::getDetails(uint8_t index, uint8_t buffer[], uint8_t len) {
     uint8_t reqData[1] = { getReg( Command::GetDetails, index ) };
-    return _i2c.request(reqData, 1, buffer, len);
+    return _client.request(reqData, 1, buffer, len);
 }
 
 void SimpleController::setDetails(uint8_t index, uint8_t value) {
@@ -69,12 +69,12 @@ void SimpleController::setDetails(uint8_t index, const uint8_t buffer[], uint8_t
     reqData[0] = getReg(Command::SetDetails, index);
 
     memcpy(reqData + 1, buffer, size);
-    _i2c.send(reqData, size + 1);
+    _client.send(reqData, size + 1);
 }
 
 void SimpleController::resetDevice() {
     uint8_t reqData[1] = { getReg(Command::Reset, 0) };
-    _i2c.send(reqData, 1);
+    _client.send(reqData, 1);
 }
 
 ClassLogger SimpleController::_logger(LC_I2C);

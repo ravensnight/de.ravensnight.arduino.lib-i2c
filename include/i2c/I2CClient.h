@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <ClassLogger.h>
+#include <i2c/I2CChecksum.h>
 
 using namespace ravensnight::logging;
 namespace ravensnight::i2c {
@@ -16,6 +17,7 @@ namespace ravensnight::i2c {
 
             uint8_t _hostAddr = 0;
             TwoWire* _i2c = 0;
+            I2CChecksum _checksum;
 
             bool _useChecksum;
 

@@ -19,13 +19,9 @@ void I2CChecksum::update(const uint8_t* buffer, size_t len) {
     }
 }
 
-void I2CChecksum::finalize() {
-    _checksum = 255 - _checksum;
-    if (_checksum == 0) _checksum = 0xFF;    
-}
-
-uint8_t I2CChecksum::get() {
-    return _checksum;
+void I2CChecksum::build(uint8_t& checksum) {
+    checksum = 255 - _checksum;
+    if (checksum == 0) checksum = 0xFF;    
 }
 
 }

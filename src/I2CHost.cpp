@@ -55,17 +55,17 @@ bool I2CHost::start(TwoWire* twi, I2CAddressProvider& address, I2CHostHandler* h
 void I2CHost::i2cReceive(int bytes) {
     if ((_handler == 0) || (bytes < 0) || (bytes > I2C_RECEIVE_BUFFER_SIZE)) return;
     
-    size_t b = (size_t)bytes;
-    I2CChecksum checksum;
+    size_t dataSize = (size_t)bytes;
 
     if (_useChecksum) {
-        b--;
+        dataSize--;
     }
 
     _logger.trace("Read %d bytes from i2c.", bytes);
 
     int16_t res = 0;
-    for (size_t i = 0; i < b; i++) {
+    _checksum.reset();
+    for (size_t i = 0; i < dataSize; i++) {
         res = _i2c->read();
         if (res < 0) {
             _logger.debug("i2cReceive - end of stream.");
@@ -73,31 +73,32 @@ void I2CHost::i2cReceive(int bytes) {
         }
         
         _receiveBuffer[i] = (uint8_t)res;
-        if (_useChecksum) checksum.update(res);        
+        _checksum.update(res); 
     }
     
     if (_useChecksum) {
-        checksum.finalize();
+        uint8_t chk = 0;
+        _checksum.build(chk);
 
         res = _i2c->read();
         if (res < 0) {
             _logger.debug("i2cReceive - checksum receive failed.");
         }
 
-        if (res != checksum.get()) {
-            _logger.info("i2cReceive - Checksum does not match %d <> %d", res, checksum.get());
+        if (res != chk) {
+            _logger.info("i2cReceive - Checksum does not match %d <> %d", res, chk);
             return;
         }
     }
 
-    _handler->parse(_receiveBuffer, b);
+    _handler->parse(_receiveBuffer, dataSize);
 }
 
 void I2CHost::i2cRequest() {
     if (_handler == 0) return;
     skipAll();
 
-    I2CChecksum checksum;
+    _checksum.reset();
     if (_handler->canRead()) {
         _logger.trace("Read model data from handler.");
         
@@ -108,13 +109,14 @@ void I2CHost::i2cRequest() {
                 return;
             }
 
-            if (_useChecksum) checksum.update(_responseBuffer[i]);
+            _checksum.update(_responseBuffer[i]);
         }
 
         if (_useChecksum) {
-            checksum.finalize();
-            _i2c->write(checksum.get());
-            _logger.trace("Sent response checksum: %d", checksum.get());
+            uint8_t chk; _checksum.build(chk);
+
+            _i2c->write(chk);
+            _logger.trace("Sent response checksum: %d", chk);
         }
 
         _logger.trace("Sent response to master: bytes=%d", res);

@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include <ClassLogger.h>
 #include <i2c/I2CAddressProvider.h>
+#include <i2c/I2CChecksum.h>
 #include <i2c/I2CHostHandler.h>
 
 using namespace ravensnight::logging;
@@ -26,9 +27,10 @@ namespace ravensnight::i2c {
 
             TwoWire*        _i2c = 0;            
             I2CHostHandler* _handler = 0;
+            I2CChecksum     _checksum;
+            bool            _useChecksum = true;
             uint8_t         _receiveBuffer[I2C_RECEIVE_BUFFER_SIZE] = { 0 };
             uint8_t         _responseBuffer[I2C_RESPONSE_BUFFER_SIZE] = { 0 };
-            bool            _useChecksum = true;
 
             /**
              * listener methods.
