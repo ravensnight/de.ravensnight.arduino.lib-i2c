@@ -75,6 +75,8 @@ void I2CHost::i2cReceive(int bytes) {
         _receiveBuffer[i] = (uint8_t)res;
         _checksum.update(res); 
     }
+
+    _logger.dump("Received data bytes.", _receiveBuffer, dataSize, 0);
     
     if (_useChecksum) {
         uint8_t chk = 0;
@@ -85,6 +87,7 @@ void I2CHost::i2cReceive(int bytes) {
             _logger.debug("i2cReceive - checksum receive failed.");
         }
 
+        _logger.debug("Received checksum %d", chk);
         if (res != chk) {
             _logger.info("i2cReceive - Checksum does not match %d <> %d", res, chk);
             return;
@@ -95,6 +98,8 @@ void I2CHost::i2cReceive(int bytes) {
 }
 
 void I2CHost::i2cRequest() {
+    _logger.trace("I2CHost::i2cRequest - start.");
+
     if (_handler == 0) return;
     skipAll();
 
@@ -111,6 +116,8 @@ void I2CHost::i2cRequest() {
 
             _checksum.update(_responseBuffer[i]);
         }
+
+        _logger.dump("Sent response data.", _responseBuffer, res, 0);
 
         if (_useChecksum) {
             uint8_t chk; _checksum.build(chk);
