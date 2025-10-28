@@ -12,9 +12,9 @@ using namespace ravensnight::logging;
 using namespace ravensnight::i2c;
 
 #ifdef I2C_AVR
-    AvrClient client;
+    I2CClient client;
 #else 
-    WireClient client(&Wire);
+    I2CClient client(&Wire);
 
     #define PIN_I2C_SCL GPIO_NUM_5
     #define PIN_I2C_SDA GPIO_NUM_4
