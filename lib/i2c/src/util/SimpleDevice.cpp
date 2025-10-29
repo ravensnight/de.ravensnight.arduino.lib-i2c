@@ -9,7 +9,7 @@ SimpleDevice::SimpleDevice(SimpleDeviceModel* model) {
     _index = 0;
 }
 
-bool SimpleDevice::parse(const uint8_t* buffer, size_t bytes) {
+bool SimpleDevice::parse(const uint8_t* buffer, uint8_t bytes) {
     if ((_model == 0) || (bytes < 0)) return false;
 
     if (bytes > 0) {    
@@ -52,20 +52,7 @@ bool SimpleDevice::parse(const uint8_t* buffer, size_t bytes) {
     return false;
 }
 
-bool SimpleDevice::canRead() {
-    if (_model == 0) return false;
-
-    switch (_command) {
-        case Command::GetDetails:
-        case Command::GetState:
-            return true;
-
-        default:
-            return false;
-    };
-}
-
-int16_t SimpleDevice::read(uint8_t* buffer, size_t maxLen) {
+int16_t SimpleDevice::preapreResponse(uint8_t* buffer, uint8_t maxLen) {
     if (_model == 0) return -1;
 
     switch (_command) {

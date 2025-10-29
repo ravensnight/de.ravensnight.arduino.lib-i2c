@@ -28,17 +28,14 @@ namespace ravensnight::i2c::util {
              * Parse some data received via I2C and calculate a new state.
              * @return true, if new state is valid / data could be parsed successfully
              */
-            bool parse(const uint8_t* buffer, size_t length);
+            bool parse(const uint8_t* params, uint8_t len);
             
             /**
-             * Return true, if the data being addressed by previous parse function can be read.
+             * Return the number of bytes to send on the bus.
+             * Else return -1 for error.
              */
-            bool canRead();
+            int16_t preapreResponse(uint8_t* out, uint8_t maxLen);
 
-            /**
-             * Send some output data matching the internal current state.
-             */
-            int16_t read(uint8_t* buffer, size_t maxLen);
     };
 
 }
