@@ -3,15 +3,12 @@
 using namespace ravensnight::i2c;
 using namespace ravensnight::i2c::util;
 
-SimpleDevice::SimpleDevice(SimpleDeviceModel* model) {
-    _model = model;
+SimpleDevice::SimpleDevice(SimpleDeviceModel& model) : _model(model) {
     _command = Command::GetState;
     _index = 0;
 }
 
 bool SimpleDevice::parse(const uint8_t* buffer, uint8_t bytes) {
-    if ((_model == 0) || (bytes < 0)) return false;
-
     if (bytes > 0) {    
         _command = (Command)(buffer[0] >> 6);
         _index = 0;
@@ -30,17 +27,17 @@ bool SimpleDevice::parse(const uint8_t* buffer, uint8_t bytes) {
             case Command::SetDetails: {
                 _index = buffer[0] & 0x3F;
 
-                int8_t len = _model->getDetailsSize(_index);            // get size expected
+                int8_t len = _model.getDetailsSize(_index);            // get size expected
                 if ((len <= 0) || (len < (uint8_t)(bytes - 1))) {       // check size expected being less then available.
                     return false;
                 }
 
-                _model->setDetails(_index, buffer + 1);
+                _model.setDetails(_index, buffer + 1);
                 return true;                
             }
 
             case Command::Reset: {
-                _model->reset();
+                _model.reset();
                 return true;
             }
 
@@ -52,16 +49,14 @@ bool SimpleDevice::parse(const uint8_t* buffer, uint8_t bytes) {
     return false;
 }
 
-int16_t SimpleDevice::preapreResponse(uint8_t* buffer, uint8_t maxLen) {
-    if (_model == 0) return -1;
-
+int16_t SimpleDevice::prepareResponse(uint8_t* buffer, uint8_t maxLen) {
     switch (_command) {
         case Command::GetState: {
             if (maxLen < 2) {
                 return -1;                
             }
 
-            uint16_t state = _model->getState();
+            uint16_t state = _model.getState();
             buffer[0] = 0x0FF & (state >> 8);
             buffer[1] = 0x0FF & state;
             
@@ -69,12 +64,12 @@ int16_t SimpleDevice::preapreResponse(uint8_t* buffer, uint8_t maxLen) {
         }
 
         case Command::GetDetails: {
-            int8_t len = _model->getDetailsSize(_index);
+            int8_t len = _model.getDetailsSize(_index);
             if ((len <= 0) || (len > (int8_t)maxLen)) {
                 return -1;
             }
 
-            _model->getDetails(_index, buffer);
+            _model.getDetails(_index, buffer);
             return len;
         }
 

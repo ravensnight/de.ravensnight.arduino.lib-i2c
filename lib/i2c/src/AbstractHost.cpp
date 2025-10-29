@@ -54,7 +54,7 @@ int16_t AbstractHost::buildResponse(uint8_t* out, uint8_t maxBufferSize) {
     uint8_t responseSize = maxBufferSize;
     if (useChecksum()) responseSize--;
 
-    int16_t dataSize = _handler->preapreResponse(out, responseSize);
+    int16_t dataSize = _handler->prepareResponse(out, responseSize);
     if ((dataSize > responseSize) || (dataSize < 0)) {
         _logger.error("Error while receiving response data. Result: %d", dataSize);
         return -1;

@@ -19,7 +19,7 @@ namespace ravensnight::i2c {
              * Return the number of bytes to send on the bus.
              * Else return -1 for error.
              */
-            virtual int16_t preapreResponse(uint8_t* out, uint8_t maxLen) = 0;
+            virtual int16_t prepareResponse(uint8_t* out, uint8_t maxLen) = 0;
 
     };
 

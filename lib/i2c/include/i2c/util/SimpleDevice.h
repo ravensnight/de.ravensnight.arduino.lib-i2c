@@ -15,14 +15,14 @@ namespace ravensnight::i2c::util {
 
         private:
 
-            volatile Command _command = Command::GetState;
-            volatile uint8_t _index = 0;
+            Command _command = Command::GetState;
+            uint8_t _index = 0;
 
-            SimpleDeviceModel* _model = 0;
+            SimpleDeviceModel& _model;
 
         public:
 
-            SimpleDevice(SimpleDeviceModel* model);
+            SimpleDevice(SimpleDeviceModel& model);
 
             /**
              * Parse some data received via I2C and calculate a new state.
@@ -34,7 +34,7 @@ namespace ravensnight::i2c::util {
              * Return the number of bytes to send on the bus.
              * Else return -1 for error.
              */
-            int16_t preapreResponse(uint8_t* out, uint8_t maxLen);
+            int16_t prepareResponse(uint8_t* out, uint8_t maxLen);
 
     };
 

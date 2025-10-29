@@ -5,15 +5,17 @@
 
 #include <i2c/I2CFixedAddress.h>
 #include <i2c/I2CHost.h>
+#include <i2c/util/SimpleDevice.h>
 
 #include <Logger.h>
 #include <DefaultSink.h>
 
-#include "Handler.h"
+#include "Model.h"
 
 using namespace ravensnight::logging;
 using namespace ravensnight::utils;
 using namespace ravensnight::i2c;
+using namespace ravensnight::i2c::util;
 
 #if defined(I2C_AVR)
     I2CHost host;
@@ -27,7 +29,9 @@ using namespace ravensnight::i2c;
 DefaultSink logAdapter(&Serial);
 
 I2CFixedAddress addr(0x01);
-Handler h;
+
+Model model;
+SimpleDevice device(model);
 
 void setup() {
 
@@ -44,7 +48,7 @@ void setup() {
     Logger::attach(&logAdapter);    
     Logger::debug("setup()");
 
-    host.setHandler(&h);
+    host.setHandler(&device);
     host.setUseChecksum(true);
     
     Logger::debug("setup() - start i2c client");

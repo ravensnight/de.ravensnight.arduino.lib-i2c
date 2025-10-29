@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <i2c/I2CClient.h>
+#include <i2c/util/SimpleController.h>
 
 #include <utils/BufferInputStream.h>
 #include <utils/BufferOutputStream.h>
@@ -10,6 +11,7 @@
 using namespace ravensnight::utils;
 using namespace ravensnight::logging;
 using namespace ravensnight::i2c;
+using namespace ravensnight::i2c::util;
 
 #ifdef I2C_AVR
     I2CClient client;
@@ -20,11 +22,10 @@ using namespace ravensnight::i2c;
     #define PIN_I2C_SDA GPIO_NUM_4
 #endif
 
+SimpleController controller(client);
 DefaultSink loggerSink(&Serial);
 
-#define BUFLEN (uint8_t)10
-uint8_t txBuffer[BUFLEN] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-uint8_t rxBuffer[BUFLEN] { 0 };
+uint8_t counter = 0;
 
 void setup() {
 
@@ -43,24 +44,45 @@ void setup() {
     client.setup(0x01);    
 }
 
+#define DELAY 400
+
 void loop() {
 
     // BufferInputStream is(send, BUFLEN);
-
-    Logger::dump("Send some data.", txBuffer, BUFLEN, 0);
-    client.send(txBuffer, BUFLEN);
-
-    Logger::debug("Request some data without parameters.");
-    int16_t len = client.request(rxBuffer, BUFLEN);
-
-    if (len >= 0) {
-        Logger::dump("Received data.", rxBuffer, len, 0);
-        Logger::debug("Send data received.");
-        Logger::debug("Request some data with parameters.");
-        client.request(rxBuffer, BUFLEN, rxBuffer, BUFLEN);
+    uint16_t state;
+    
+    if (controller.getState(state) > 0) {
+        Logger::debug("Received initial state: %d", state);
     } else {
-        Logger::error("Receive failed.");
+        Logger::error("Retrieving initial state failed.", state);
     }
 
-    delay(500);
+    delay(DELAY);
+
+    uint8_t val = 10 - counter;
+    Logger::debug("Set value %d at position %d", val, counter);
+    controller.setDetails(counter, val);
+
+    delay(DELAY);
+
+    Logger::debug("Request value at position %d", counter);
+    if (controller.getDetails(counter, val) > 0) {
+        Logger::debug("Received value %d", val);
+    }
+
+    delay(DELAY);
+
+    if (controller.getState(state) > 0) {
+        Logger::debug("Received state post update: %d", state);
+    } else {
+        Logger::error("Retrieving updated state failed.", state);
+    }
+    
+    counter++;
+    if (counter >= 10) {
+        controller.resetDevice();
+        counter = 0;
+    }
+
+    delay(DELAY);
 }
