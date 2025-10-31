@@ -1,5 +1,7 @@
 #include <i2c/util/SimpleDevice.h>
+#include <utils/StreamHelper.h>
 
+using namespace ravensnight::utils;
 using namespace ravensnight::i2c;
 using namespace ravensnight::i2c::util;
 
@@ -57,8 +59,7 @@ int16_t SimpleDevice::prepareResponse(uint8_t* buffer, uint8_t maxLen) {
             }
 
             uint16_t state = _model.getState();
-            buffer[0] = 0x0FF & (state >> 8);
-            buffer[1] = 0x0FF & state;
+            StreamHelper::write16(buffer, state);
             
             return 2;
         }

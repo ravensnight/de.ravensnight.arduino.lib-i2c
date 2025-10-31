@@ -35,7 +35,7 @@ int16_t SimpleController::getDetails(uint8_t index, uint8_t& value) {
     int16_t res = getDetails(index, buffer, 1);
 
     if (res == 1) {
-        value = buffer[0];
+        StreamHelper::read8(buffer, value);
     }
     return res;
 }
@@ -44,9 +44,8 @@ int16_t SimpleController::getDetails(uint8_t index, uint16_t& value) {
     uint8_t buffer[2];
     int16_t res = getDetails(index, buffer, 2);
 
-    if (res == 2) {
-        value = (buffer[0] << 8);
-        value |= buffer[1];
+    if (res == 2) {        
+        StreamHelper::read16(buffer, value);
     }
     return res;
 }
@@ -63,8 +62,8 @@ void SimpleController::setDetails(uint8_t index, uint8_t value) {
 
 void SimpleController::setDetails(uint8_t index, uint16_t value) {
     uint8_t buffer[2];
-    buffer[0] = (uint8_t)(value >> 8);
-    buffer[1] = (uint8_t)(value & 0xFF);
+    StreamHelper::write16(buffer, value);
+    
     setDetails(index, buffer, 2);
 }
 
