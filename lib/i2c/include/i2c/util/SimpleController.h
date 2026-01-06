@@ -1,9 +1,9 @@
 #ifndef __SimpleController_h__
 #define __SimpleController_h__
 
-#include <ClassLogger.h>
+#include <Logger.h>
 #include <i2c/common.h>
-#include <i2c/I2CClient.h>
+#include <i2c/I2CController.h>
 
 using namespace ravensnight::logging;
 namespace ravensnight::i2c::util {
@@ -12,14 +12,14 @@ namespace ravensnight::i2c::util {
 
         private:
         
-            static ClassLogger _logger;
+            static Logger _logger;
 
-            I2CClient& _client;
+            I2CController& _client;
             uint8_t getReg(Command cmd, int index);
 
         public:
 
-            SimpleController(I2CClient& client);
+            SimpleController(I2CController& client);
 
             int16_t getState(uint16_t& state);
 
@@ -31,6 +31,7 @@ namespace ravensnight::i2c::util {
             void setDetails(uint8_t index, uint16_t value);
             void setDetails(uint8_t index, const uint8_t buffer[], uint8_t len);
 
+            void resetValues();
             void resetDevice();
 
     };

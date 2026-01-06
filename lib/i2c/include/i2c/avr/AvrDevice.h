@@ -2,52 +2,51 @@
 #define __AvrHost_h__
 
 #include <Arduino.h>
-#include <i2c/AbstractHost.h>
+#include <i2c/AbstractDevice.h>
 
 namespace ravensnight::i2c::avr {
 
     #define AVRHOST_RX_BUFFER_SIZE 32
     #define AVRHOST_TX_BUFFER_SIZE 32
 
-    enum class AvrHostStatus {
+    enum class AvrDeviceStatus {
         idle = 0,
         receiving,
         sending
     };
 
     typedef struct {
-        AvrHostStatus status = AvrHostStatus::idle;
+        AvrDeviceStatus status = AvrDeviceStatus::idle;
 
         uint8_t reqBufferPos;
         uint8_t reqBuffer[AVRHOST_RX_BUFFER_SIZE];
         uint8_t respBufferPos;
         uint8_t respBuffer[AVRHOST_TX_BUFFER_SIZE];
 
-    } AvrHostData;
+    } AvrDeviceData;
 
-    class AvrHost : public AbstractHost {
-        
-        protected:
-
-            bool install(uint8_t hostAddr);
+    class AvrDevice : public AbstractDevice {
 
         public:
 
-            static AvrHost* instance;
+            static AvrDevice* instance;
+            AvrDeviceData state;
 
-            AvrHost();
-            AvrHostData state;
+            AvrDevice();
 
             // ----------------------------------------------------------------
             // Internal AVR twi/register Functions
             // ----------------------------------------------------------------
             static uint8_t twi_status();
-            static void twi_receive_start(AvrHostData& data);
-            static void twi_receive_next(AvrHostData& data);
-            static void twi_response_start(AvrHostData& data);
-            static void twi_response_next(AvrHostData& data);
-            static void twi_stop(AvrHostData& data);
+            static void twi_receive_start(AvrDeviceData& data);
+            static void twi_receive_next(AvrDeviceData& data);
+            static void twi_response_start(AvrDeviceData& data);
+            static void twi_response_next(AvrDeviceData& data);
+            static void twi_stop(AvrDeviceData& data);
             static void twi_ack();
+
+            bool install(uint8_t hostAddr);
+
     };
 
 }

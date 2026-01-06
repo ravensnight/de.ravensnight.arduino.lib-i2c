@@ -1,9 +1,9 @@
 
-#ifndef __AvrClient_h__
-#define __AvrClient_h__
+#ifndef __AvrController_h__
+#define __AvrController_h__
 
 #include <Arduino.h>
-#include <i2c/AbstractClient.h>
+#include <i2c/AbstractController.h>
 
 namespace ravensnight::i2c::avr {
 
@@ -15,19 +15,11 @@ namespace ravensnight::i2c::avr {
     #define AVR_TWICLIENT_RETRIES 5
     #endif 
 
-    class AvrClient : public AbstractClient {
+    class AvrController : public AbstractController {
 
         private:
             uint32_t _clockSpeed;
             uint8_t _hostAddr;  
-
-        public:
-
-            AvrClient();
-            AvrClient(uint32_t clockSpeed);
-
-            /** Initialize */
-            void setup(uint8_t hostAddr);
 
         protected:
 
@@ -36,7 +28,16 @@ namespace ravensnight::i2c::avr {
             int16_t write(const uint8_t* buffer, uint8_t len);
             void stop();
 
+        public:
+
+            AvrController();
+            AvrController(uint32_t clockSpeed);
+
+            /** Connect a dedicated device */
+            void connect(uint8_t hostAddr);
+
+            bool probe(uint8_t addr);
     };
 }
 
-#endif // __AvrClient_h__
+#endif // __AvrController_h__

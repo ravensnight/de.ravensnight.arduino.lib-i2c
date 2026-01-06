@@ -2,27 +2,26 @@
 #define __SimpleDevice_h__
 
 #include <i2c/common.h>
-#include <i2c/util/SimpleDeviceModel.h>
-#include <i2c/I2CHostHandler.h>
-#include <i2c/I2CAddressProvider.h>
+#include <i2c/util/SimpleAdapterModel.h>
+#include <i2c/I2CDeviceAdapter.h>
 
 namespace ravensnight::i2c::util {
 
     /**
      * Defines an I2C Device / I2C Slave
      */
-    class SimpleDevice : public I2CHostHandler {
+    class SimpleAdapter : public I2CDeviceAdapter {
 
         private:
 
             Command _command = Command::GetState;
             uint8_t _index = 0;
 
-            SimpleDeviceModel& _model;
+            SimpleAdapterModel& _model;
 
         public:
 
-            SimpleDevice(SimpleDeviceModel& model);
+            SimpleAdapter(SimpleAdapterModel& model);
 
             /**
              * Parse some data received via I2C and calculate a new state.

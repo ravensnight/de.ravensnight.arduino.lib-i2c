@@ -52,4 +52,11 @@ void Model::reset() {
     memset(_buffer, 0, BUFFER_LEN);
 }
 
+/**
+ * Reset the device
+ */
+void Model::reboot() {
+    reset();
+}
+
 

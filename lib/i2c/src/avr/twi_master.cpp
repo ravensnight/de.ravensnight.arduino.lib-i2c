@@ -1,5 +1,5 @@
 #ifdef __AVR__
-#ifdef I2C_AVR
+#if I2C_IMPL == 2
 
 #include <i2c/avr/twi_master.h>
 

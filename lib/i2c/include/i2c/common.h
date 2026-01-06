@@ -16,10 +16,11 @@ namespace ravensnight::i2c {
 
 typedef enum {
 
-    GetState   = 0x0,     // Read the dirty mask
-    GetDetails = 0x1,     // get some details for indexed element
-    SetDetails = 0x2,     // set some details on indexed element
-    Reset      = 0x3      // Reset all values    
+    GetState    = 0x0,     // Read the dirty mask
+    GetValue    = 0x1,     // get some details for indexed element
+    SetValue    = 0x2,     // set some details on indexed element
+    ResetValues = 0x3,     // Reset all values    
+    ResetDevice = 0x4
 
 } Command;
 

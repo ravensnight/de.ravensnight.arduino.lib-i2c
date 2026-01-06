@@ -1,47 +1,52 @@
 #include <Arduino.h>
-#include <i2c/I2CClient.h>
+#include <i2c/I2CController.h>
 #include <i2c/util/SimpleController.h>
 
 #include <utils/BufferInputStream.h>
 #include <utils/BufferOutputStream.h>
 
 #include <Logger.h>
-#include <DefaultSink.h>
+#include <SerialLogAdapter.h>
 
 using namespace ravensnight::utils;
 using namespace ravensnight::logging;
 using namespace ravensnight::i2c;
 using namespace ravensnight::i2c::util;
 
-#ifdef I2C_AVR
-    I2CClient client;
-#else 
-    I2CClient client(&Wire);
+namespace ravensnight::logging {
+    LogLevel getLogLevel(const char* category) {
+        return LogLevel::trace;
+    }
+}
 
-    #define PIN_I2C_SCL GPIO_NUM_5
-    #define PIN_I2C_SDA GPIO_NUM_4
+#if I2C_IMPL == 2
+    I2CController client;
+#else 
+    I2CController client(&Wire);
+
+    #ifdef ESP32
+        #define PIN_I2C_SCL GPIO_NUM_5
+        #define PIN_I2C_SDA GPIO_NUM_4
+    #endif
 #endif
 
 SimpleController controller(client);
-DefaultSink loggerSink(&Serial);
+SerialLogAdapter logAdapter;
 
 uint8_t counter = 0;
 
 void setup() {
 
     #ifdef ESP32
-    Serial.begin(115200);
-    Serial.setDebugOutput(true);
-        #ifdef I2C_WIRE
-        Wire.setPins(PIN_I2C_SDA, PIN_I2C_SCL);
+        #if I2C_IMPL == 1
+            Wire.setPins(PIN_I2C_SDA, PIN_I2C_SCL);
         #endif
     #endif
 
-    Logger::setLevel(LogLevel::trace);
-    Logger::attach(&loggerSink);    
+    Logger::setup(&logAdapter);    
 
     client.setUseChecksum(true);
-    client.setup(0x01);    
+    client.connect(0x01);    
 }
 
 #define DELAY 400
@@ -52,30 +57,30 @@ void loop() {
     uint16_t state;
     
     if (controller.getState(state) > 0) {
-        Logger::debug("Received initial state: %d", state);
+        Logger::root.debug("Received initial state: %d", state);
     } else {
-        Logger::error("Retrieving initial state failed.", state);
+        Logger::root.error("Retrieving initial state failed.", state);
     }
 
     delay(DELAY);
 
     uint8_t val = 10 - counter;
-    Logger::debug("Set value %d at position %d", val, counter);
+    Logger::root.debug("Set value %d at position %d", val, counter);
     controller.setDetails(counter, val);
 
     delay(DELAY);
 
-    Logger::debug("Request value at position %d", counter);
+    Logger::root.debug("Request value at position %d", counter);
     if (controller.getDetails(counter, val) > 0) {
-        Logger::debug("Received value %d", val);
+        Logger::root.debug("Received value %d", val);
     }
 
     delay(DELAY);
 
     if (controller.getState(state) > 0) {
-        Logger::debug("Received state post update: %d", state);
+        Logger::root.debug("Received state post update: %d", state);
     } else {
-        Logger::error("Retrieving updated state failed.", state);
+        Logger::root.error("Retrieving updated state failed.", state);
     }
     
     counter++;

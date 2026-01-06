@@ -5,7 +5,7 @@
 
 namespace ravensnight::i2c::util {
 
-    class SimpleDeviceModel {
+    class SimpleAdapterModel {
 
         public:
 
@@ -33,6 +33,11 @@ namespace ravensnight::i2c::util {
              * Reset the internal states.
              */
             virtual void reset() = 0;
+
+            /**
+             * Restart the device
+             */
+            virtual void reboot() = 0;
     };
 
 }

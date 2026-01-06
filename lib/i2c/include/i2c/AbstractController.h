@@ -4,7 +4,6 @@
 #include <Arduino.h>
 
 #include <Logger.h>
-#include <ClassLogger.h>
 #include <i2c/util/Checksum.h>
 
 using namespace ravensnight::logging;
@@ -19,13 +18,13 @@ namespace ravensnight::i2c {
     #define I2C_CLIENT_RX_BUFFER_SIZE 32
     #endif
 
-    class AbstractClient {
+    class AbstractController {
 
         private:
 
-            static ClassLogger _logger;
+            static Logger _logger;
 
-            bool    _useChecksum;
+            bool    _useChecksum = true;
             ravensnight::i2c::util::Checksum  _checksum;
 
             uint8_t _txBuffer[I2C_CLIENT_TX_BUFFER_SIZE + 1]; // transmit buffer add one byte for checksum
@@ -34,9 +33,16 @@ namespace ravensnight::i2c {
             int16_t bus_write(const uint8_t* txBuffer, uint8_t txSize);
             int16_t bus_read(uint8_t* rxBuffer, uint8_t maxRxSize);
 
-        public:
+        protected:
 
-            AbstractClient();
+            virtual bool start(bool write) = 0;
+            virtual int16_t read(uint8_t* buffer, uint8_t len) = 0;
+            virtual int16_t write(const uint8_t* buffer, uint8_t len) = 0;
+            virtual void stop() = 0;
+
+            AbstractController();
+
+        public:
 
             /** enable / disable checksum */
             void setUseChecksum(bool enable);
@@ -45,7 +51,7 @@ namespace ravensnight::i2c {
             bool useChecksum();
             
             /** Probe if a slave/host exists */
-            bool probe();
+            virtual bool probe(uint8_t addr) = 0;
 
             /** Publish some bytes */
             int16_t send(const uint8_t* txBuffer, uint8_t size);
@@ -57,14 +63,7 @@ namespace ravensnight::i2c {
             int16_t request(const uint8_t* txBuffer, uint8_t txSize, uint8_t* rxBuffer, uint8_t maxRxSize);
 
             /** Initialize */
-            virtual void setup(uint8_t hostAddr) = 0;
-
-        protected:
-
-            virtual bool start(bool write) = 0;
-            virtual int16_t read(uint8_t* buffer, uint8_t len) = 0;
-            virtual int16_t write(const uint8_t* buffer, uint8_t len) = 0;
-            virtual void stop() = 0;
+            virtual void connect(uint8_t hostAddr) = 0;
 
     };
 }

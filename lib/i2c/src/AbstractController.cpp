@@ -1,5 +1,5 @@
 #include <utils/StreamHelper.h>
-#include <i2c/AbstractClient.h>
+#include <i2c/AbstractController.h>
 #include <i2c/LoggerConfig.h>
 
 using namespace ravensnight::utils;
@@ -7,29 +7,23 @@ using namespace ravensnight::logging;
 
 namespace ravensnight::i2c {
 
-AbstractClient::AbstractClient() {
+Logger AbstractController::_logger(LC_I2C);
+
+AbstractController::AbstractController() {
     _useChecksum = true;
 }
 
 /** enable / disable checksum */
-void AbstractClient::setUseChecksum(bool enable) {
+void AbstractController::setUseChecksum(bool enable) {
     _useChecksum = enable;
 }
 
 /** @return true, if checksum is enabled */
-bool AbstractClient::useChecksum() {
+bool AbstractController::useChecksum() {
     return _useChecksum;
 }
 
-/** Probe if a slave/host exists */
-bool AbstractClient::probe() {
-    bool res = start(true);
-    stop();
-
-    return res;
-}
-
-int16_t AbstractClient::bus_read(uint8_t* rxBuffer, uint8_t maxRxSize) {
+int16_t AbstractController::bus_read(uint8_t* rxBuffer, uint8_t maxRxSize) {
 
     if (!start(false)) {
         return -1;
@@ -79,7 +73,7 @@ int16_t AbstractClient::bus_read(uint8_t* rxBuffer, uint8_t maxRxSize) {
     return res;
 }
 
-int16_t AbstractClient::bus_write(const uint8_t* txBuffer, uint8_t txSize) {
+int16_t AbstractController::bus_write(const uint8_t* txBuffer, uint8_t txSize) {
     if (!start(true)) {
         return -1;
     }
@@ -109,7 +103,7 @@ int16_t AbstractClient::bus_write(const uint8_t* txBuffer, uint8_t txSize) {
 }
 
 /** Publish some bytes */
-int16_t AbstractClient::send(const uint8_t* txBuffer, uint8_t txSize) {    
+int16_t AbstractController::send(const uint8_t* txBuffer, uint8_t txSize) {    
     int16_t res = bus_write(txBuffer, txSize);
     stop();
 
@@ -117,7 +111,7 @@ int16_t AbstractClient::send(const uint8_t* txBuffer, uint8_t txSize) {
 }
 
 /** Reqest some data without any paramters */
-int16_t AbstractClient::request(uint8_t* rxBuffer, uint8_t maxRxSize) {
+int16_t AbstractController::request(uint8_t* rxBuffer, uint8_t maxRxSize) {
     int16_t res = bus_read(rxBuffer, maxRxSize);
     stop();
 
@@ -125,10 +119,10 @@ int16_t AbstractClient::request(uint8_t* rxBuffer, uint8_t maxRxSize) {
 }
 
 /** Reqest some data and some some parameters before. */
-int16_t AbstractClient::request(const uint8_t* txBuffer, uint8_t txSize, uint8_t* rxBuffer, uint8_t maxRxSize) {
+int16_t AbstractController::request(const uint8_t* txBuffer, uint8_t txSize, uint8_t* rxBuffer, uint8_t maxRxSize) {
     int16_t res = bus_write(txBuffer, txSize);
     if (res < 0) {
-        _logger.error("AbstractClient::request - Failed to write data to bus. Stop.");
+        _logger.error("AbstractController::request - Failed to write data to bus. Stop.");
         stop();
         return -1;
     }
@@ -136,14 +130,13 @@ int16_t AbstractClient::request(const uint8_t* txBuffer, uint8_t txSize, uint8_t
     // restart read - no stop signal here.
     res = bus_read(rxBuffer, maxRxSize);
     if (res < 0) {
-        _logger.error("AbstractClient::request - Failed to read data from bus. Stop.");        
+        _logger.error("AbstractController::request - Failed to read data from bus. Stop.");        
     }
 
     stop();
     return res;
 }
 
-ClassLogger AbstractClient::_logger(LC_I2C);
 
 }
 

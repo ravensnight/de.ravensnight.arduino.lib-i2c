@@ -1,14 +1,15 @@
 #ifdef __AVR__
-#ifdef I2C_AVR
+#include <i2c/configure.h>
+#if I2C_IMPL == 2
 
 #include <Arduino.h>
 #include <avr/io.h>
 #include <util/twi.h>
-#include <i2c/avr/AvrHost.h>
+#include <i2c/avr/AvrDevice.h>
 
 namespace ravensnight::i2c::avr {
 
-AvrHost* AvrHost::instance = 0;
+AvrDevice* AvrDevice::instance = 0;
 
 /**
  * Interrupt service routine.
@@ -16,38 +17,38 @@ AvrHost* AvrHost::instance = 0;
 
 ISR(TWI_vect) {
     uint8_t status = TWSR & 0xF8;
-    if (AvrHost::instance == 0) return;
+    if (AvrDevice::instance == 0) return;
 
     switch (status) {
 
     // --- Master schreibt an Slave (SLA+W) ---
     case TW_SR_SLA_ACK:
-        AvrHost::twi_receive_start(AvrHost::instance->state);
+        AvrDevice::twi_receive_start(AvrDevice::instance->state);
         break;
 
     // --- Datenbyte vom Master empfangen ---
     case TW_SR_DATA_ACK:
-        AvrHost::twi_receive_next(AvrHost::instance->state);
+        AvrDevice::twi_receive_next(AvrDevice::instance->state);
         break;
 
     // --- STOP erkannt (Master fertig mit Write) ---
     case TW_SR_STOP:
-        AvrHost::twi_stop(AvrHost::instance->state);
+        AvrDevice::twi_stop(AvrDevice::instance->state);
         break;
 
     // --- Master liest vom Slave (SLA+R) ---
     case TW_ST_SLA_ACK:
-        AvrHost::twi_response_start(AvrHost::instance->state);
+        AvrDevice::twi_response_start(AvrDevice::instance->state);
         break;
 
     // --- Master liest weiteres Byte ---
     case TW_ST_DATA_ACK:
-        AvrHost::twi_response_next(AvrHost::instance->state);
+        AvrDevice::twi_response_next(AvrDevice::instance->state);
         break;
 
     // --- Master beendet Lesen (NACK) ---
     case TW_ST_DATA_NACK:
-        AvrHost::twi_stop(AvrHost::instance->state);
+        AvrDevice::twi_stop(AvrDevice::instance->state);
         break;
 
     // --- Fehler oder nicht unterstützt ---
@@ -57,22 +58,22 @@ ISR(TWI_vect) {
     }
 }
 
-uint8_t AvrHost::twi_status() {
+uint8_t AvrDevice::twi_status() {
     return TWSR & 0xF8;
 }
 
-void AvrHost::twi_ack() {
+void AvrDevice::twi_ack() {
     TWCR = (1<<TWINT)|(1<<TWEA)|(1<<TWEN)|(1<<TWIE);
 }
 
-void AvrHost::twi_receive_start(AvrHostData& data) {
+void AvrDevice::twi_receive_start(AvrDeviceData& data) {
     data.reqBufferPos = 0;
-    data.status = AvrHostStatus::receiving;
+    data.status = AvrDeviceStatus::receiving;
 
     twi_ack();
 }
 
-void AvrHost::twi_receive_next(AvrHostData& data) {
+void AvrDevice::twi_receive_next(AvrDeviceData& data) {
     if (data.reqBufferPos < AVRHOST_RX_BUFFER_SIZE) {
         data.reqBuffer[data.reqBufferPos] = TWDR;
         data.reqBufferPos++;
@@ -81,37 +82,37 @@ void AvrHost::twi_receive_next(AvrHostData& data) {
     twi_ack();
 }
 
-void AvrHost::twi_stop(AvrHostData& data) {
-    if (data.status == AvrHostStatus::receiving) {
-        AvrHost::instance->parseRequest(data.reqBuffer, data.reqBufferPos);                
+void AvrDevice::twi_stop(AvrDeviceData& data) {
+    if (data.status == AvrDeviceStatus::receiving) {
+        AvrDevice::instance->parseRequest(data.reqBuffer, data.reqBufferPos);                
     }
 
-    data.status = AvrHostStatus::idle;
+    data.status = AvrDeviceStatus::idle;
     data.respBufferPos = 0;
     data.reqBufferPos = 0;
 
     twi_ack();
 }
 
-void AvrHost::twi_response_start(AvrHostData& data) {
-    if (data.status == AvrHostStatus::receiving) {
+void AvrDevice::twi_response_start(AvrDeviceData& data) {
+    if (data.status == AvrDeviceStatus::receiving) {
         // Das ist der Fall: Write → Repeated Start → Read
-        AvrHost::instance->parseRequest(data.reqBuffer, data.reqBufferPos);
-        AvrHost::instance->buildResponse(data.respBuffer, AVRHOST_TX_BUFFER_SIZE);
+        AvrDevice::instance->parseRequest(data.reqBuffer, data.reqBufferPos);
+        AvrDevice::instance->buildResponse(data.respBuffer, AVRHOST_TX_BUFFER_SIZE);
     } 
-    else if (data.status == AvrHostStatus::idle) {
+    else if (data.status == AvrDeviceStatus::idle) {
         // Direkter Read ohne Write davor
-        AvrHost::instance->buildResponse(data.respBuffer, AVRHOST_TX_BUFFER_SIZE);
+        AvrDevice::instance->buildResponse(data.respBuffer, AVRHOST_TX_BUFFER_SIZE);
     }
 
-    data.status = AvrHostStatus::sending;
+    data.status = AvrDeviceStatus::sending;
     data.respBufferPos = 0;
     TWDR = data.respBuffer[data.respBufferPos++];
 
     twi_ack();
 }
 
-void AvrHost::twi_response_next(AvrHostData& data) {
+void AvrDevice::twi_response_next(AvrDeviceData& data) {
     if (data.respBufferPos < AVRHOST_TX_BUFFER_SIZE) {
         TWDR = data.respBuffer[data.respBufferPos];
         data.respBufferPos++;
@@ -126,16 +127,16 @@ void AvrHost::twi_response_next(AvrHostData& data) {
 /**
  * Constructor
  */
-AvrHost::AvrHost() {    
+AvrDevice::AvrDevice() {    
 }
 
-bool AvrHost::install(uint8_t addr) {
+bool AvrDevice::install(uint8_t addr) {
     TWAR = (addr << 1);  // 7-bit Adresse
 
     twi_ack();
     sei();
 
-    AvrHost::instance = this;
+    AvrDevice::instance = this;
     return true;
 }
 

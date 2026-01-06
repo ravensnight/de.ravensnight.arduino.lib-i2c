@@ -1,11 +1,11 @@
-#ifndef __I2CHostHandler_h__
-#define __I2CHostHandler_h__
+#ifndef __I2CDeviceAdapter_h__
+#define __I2CDeviceAdapter_h__
 
 #include <Arduino.h>
 
 namespace ravensnight::i2c {
 
-    class I2CHostHandler {
+    class I2CDeviceAdapter {
 
         public:
 
@@ -25,4 +25,4 @@ namespace ravensnight::i2c {
 
 }
 
-#endif // __I2CHostHandler_h__
+#endif // __I2CDeviceAdapter_h__

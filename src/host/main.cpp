@@ -3,12 +3,11 @@
 #include <utils/BufferInputStream.h>
 #include <utils/BufferOutputStream.h>
 
-#include <i2c/I2CFixedAddress.h>
-#include <i2c/I2CHost.h>
-#include <i2c/util/SimpleDevice.h>
+#include <i2c/I2CDevice.h>
+#include <i2c/util/SimpleAdapter.h>
 
 #include <Logger.h>
-#include <DefaultSink.h>
+#include <SerialLogAdapter.h>
 
 #include "Model.h"
 
@@ -17,46 +16,45 @@ using namespace ravensnight::utils;
 using namespace ravensnight::i2c;
 using namespace ravensnight::i2c::util;
 
-#if defined(I2C_AVR)
-    I2CHost host;
-#else 
-    I2CHost host(&Wire);
+namespace ravensnight::logging {
+    LogLevel getLogLevel(const char* category) {
+        return LogLevel::trace;
+    }
+}
 
+#if I2C_IMPL == 2
+    I2CDevice device;
+#else 
+    I2CDevice device(&Wire);
+
+    #ifdef ESP32
     #define PIN_I2C_SCL GPIO_NUM_5
     #define PIN_I2C_SDA GPIO_NUM_4
+    #endif
 #endif
 
-DefaultSink logAdapter(&Serial);
+SerialLogAdapter logAdapter;
 
-I2CFixedAddress addr(0x01);
+uint8_t addr = 0x01;
 
 Model model;
-SimpleDevice device(model);
+SimpleAdapter deviceAdapter(model);
+
 
 void setup() {
 
-    #ifdef ESP32
-    Serial.begin(115200);
-    Serial.setDebugOutput(true);
+    Logger::setup(&logAdapter);    
+    Logger::root.debug("setup()");
 
-        #ifdef I2C_WIRE
-        Wire.setPins(PIN_I2C_SDA, PIN_I2C_SCL);
-        #endif
-    #endif
-
-    Logger::setLevel(LogLevel::trace);
-    Logger::attach(&logAdapter);    
-    Logger::debug("setup()");
-
-    host.setHandler(&device);
-    host.setUseChecksum(true);
+    device.setAdapter(&deviceAdapter);
+    device.setUseChecksum(true);
     
-    Logger::debug("setup() - start i2c client");
+    Logger::root.debug("setup() - start i2c client");
     
-    host.setup(addr);
+    device.install(addr);
 }
 
 void loop() {
     delay(1000);
-    Logger::debug("In loop()");
+    Logger::root.debug("In loop()");
 }

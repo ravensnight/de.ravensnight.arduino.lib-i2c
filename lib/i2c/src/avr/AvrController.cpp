@@ -1,11 +1,12 @@
 #ifdef __AVR__ 
-#ifdef I2C_AVR
+#include <i2c/configure.h>
+#if I2C_IMPL == 2
 
 #include <avr/io.h>
 #include <util/twi.h>
 
 #include <i2c/avr/twi_master.h>
-#include <i2c/avr/AvrClient.h>
+#include <i2c/avr/AvrController.h>
 
 #ifndef F_CPU
 #define F_CPU 8000000UL
@@ -13,20 +14,27 @@
 
 namespace ravensnight::i2c::avr {
 
-AvrClient::AvrClient() : AvrClient(F_SCL) {
+AvrController::AvrController() : AvrController(F_SCL) {
 }
 
-AvrClient::AvrClient(uint32_t clockSpeed) : AbstractClient() {   
+AvrController::AvrController(uint32_t clockSpeed) : AbstractController() {   
     _hostAddr = 0x00;
     _clockSpeed = clockSpeed;
 }
 
-void AvrClient::setup(uint8_t hostAddr) {
+void AvrController::connect(uint8_t hostAddr) {
     _hostAddr = hostAddr;
     twi::init(_clockSpeed);
 }
 
-bool AvrClient::start(bool write) {
+bool AvrController::probe(uint8_t addr) {
+    twi_result res = twi::start(addr, true, AVR_TWICLIENT_RETRIES);
+    twi::stop();
+
+    return (res == twi_result::success);
+}
+
+bool AvrController::start(bool write) {
     twi_result res = twi::start(_hostAddr, write, AVR_TWICLIENT_RETRIES);
 
     if (res != twi_result::success) {
@@ -37,7 +45,7 @@ bool AvrClient::start(bool write) {
     return true;
 }
 
-int16_t AvrClient::read(uint8_t* buffer, uint8_t len) {
+int16_t AvrController::read(uint8_t* buffer, uint8_t len) {
     for (uint8_t i = 0; i < len; i++) {
         if (i < (len - 1)) {
             buffer[i] = twi::read_ack();
@@ -49,7 +57,7 @@ int16_t AvrClient::read(uint8_t* buffer, uint8_t len) {
     return len;
 }
 
-int16_t AvrClient::write(const uint8_t* buffer, uint8_t len) {
+int16_t AvrController::write(const uint8_t* buffer, uint8_t len) {
 
     for (uint8_t i = 0; i < len; i++) {
         twi_result res = twi::write(buffer[i]);
@@ -61,7 +69,7 @@ int16_t AvrClient::write(const uint8_t* buffer, uint8_t len) {
     return len;
 }
 
-void AvrClient::stop() {
+void AvrController::stop() {
     twi::stop();
 }
 

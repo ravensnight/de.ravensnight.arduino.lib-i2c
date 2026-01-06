@@ -1,41 +1,57 @@
-#ifdef I2C_WIRE
+#include <i2c/configure.h>
+#if I2C_IMPL == 1
 
-#include <i2c/wire/WireHost.h>
+#include <assert.h>
+#include <i2c/wire/WireDevice.h>
 #include <i2c/LoggerConfig.h>
 
 namespace ravensnight::i2c::wire {
 
-WireHost* WireHost::instance = 0;
-ClassLogger WireHost::_logger(LC_I2C);
+WireDevice* WireDevice::instance = 0;
+Logger WireDevice::_logger(LC_I2C);
 
-WireHost::WireHost(TwoWire* wire) {
-    _wire = wire;
+WireDevice::WireDevice(TwoWire* wire) {
+    assert(wire != 0);
+
+    _wire = wire; 
+    _addr = INVALID_ADDR;
 }
 
 /**
  * Initialize the instance.
  */
-bool WireHost::install(uint8_t addr) {
-    _logger.debug("WireHost::install");
+bool WireDevice::install(uint8_t addr) {
+    _logger.debug("WireDevice::install");
 
-    if (_wire != 0) {
-        _wire->onReceive(WireHost::__onReceive);
-        _wire->onRequest(WireHost::__onRequest);
-        _wire->begin(addr);
-
-        WireHost::instance = this;
-        return true;
+    if (_addr != INVALID_ADDR) {
+        _wire->end();
+    } 
+    else {
+        _wire->onReceive(WireDevice::__onReceive);
+        _wire->onRequest(WireDevice::__onRequest);
     }
 
-    return false;
+    bool res = true;
+    #ifdef __AVR__
+        _wire->begin(addr);
+    #else
+        res = _wire->begin(addr);
+    #endif
+    
+    if (res) {
+        _addr = addr;
+        WireDevice::instance = this;
+    }
+
+    return res;
 }
 
-void WireHost::skipAll() {
+void WireDevice::skipAll() {
     while (_wire->available()) _wire->read();
 }
 
-void WireHost::receive(int bytes) {
-    _logger.trace("WireHost::doReceive");
+void WireDevice::receive(int bytes) {
+    _logger.trace("WireDevice::doReceive");
 
     if ((bytes < 0) || (bytes > TWIHOST_RX_BUFFER_SIZE)) return;
     
@@ -66,8 +82,8 @@ void WireHost::receive(int bytes) {
     this->parseRequest(_rxBuffer, len);
 }
 
-void WireHost::transmit() {
-    _logger.trace("WireHost::doReply");
+void WireDevice::transmit() {
+    _logger.trace("WireDevice::doReply");
 
     int16_t res = this->buildResponse(_txBuffer, TWIHOST_TX_BUFFER_SIZE);
     if ((res < 0) || (res > TWIHOST_TX_BUFFER_SIZE)) {
@@ -79,12 +95,12 @@ void WireHost::transmit() {
     _logger.trace("Sent response to master: bytes=%d", res);    
 }
 
-void WireHost::__onReceive(int bytes) {
-    WireHost::instance->receive(bytes);
+void WireDevice::__onReceive(int bytes) {
+    WireDevice::instance->receive(bytes);
 }
 
-void WireHost::__onRequest() {
-    WireHost::instance->transmit();
+void WireDevice::__onRequest() {
+    WireDevice::instance->transmit();
 }
 
 }

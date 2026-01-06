@@ -1,11 +1,11 @@
 
-#ifndef __WireClient_h__
-#define __WireClient_h__
+#ifndef __WireController_h__
+#define __WireController_h__
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <ClassLogger.h>
-#include <i2c/AbstractClient.h>
+#include <Logger.h>
+#include <i2c/AbstractController.h>
 
 using namespace ravensnight::logging;
 
@@ -17,11 +17,11 @@ namespace ravensnight::i2c::wire {
         write = 2
     };
 
-    class WireClient : public AbstractClient {
+    class WireController : public AbstractController {
 
         private:
 
-            static ClassLogger _logger;
+            static Logger _logger;
 
             State   _state = State::idle;
             uint8_t _hostAddr = 0;
@@ -30,8 +30,10 @@ namespace ravensnight::i2c::wire {
 
         public:
 
-            WireClient(TwoWire* wire); 
-            void setup(uint8_t hostAddr);
+            WireController(TwoWire* wire); 
+
+            void connect(uint8_t hostAddr);
+            bool probe(uint8_t addr);
 
         protected:
 
@@ -43,4 +45,4 @@ namespace ravensnight::i2c::wire {
 }
 
 
-#endif // __WireClient_h__
+#endif // __WireController_h__

@@ -1,16 +1,16 @@
-#include <i2c/util/SimpleDevice.h>
+#include <i2c/util/SimpleAdapter.h>
 #include <utils/StreamHelper.h>
 
 using namespace ravensnight::utils;
 using namespace ravensnight::i2c;
 using namespace ravensnight::i2c::util;
 
-SimpleDevice::SimpleDevice(SimpleDeviceModel& model) : _model(model) {
+SimpleAdapter::SimpleAdapter(SimpleAdapterModel& model) : _model(model) {
     _command = Command::GetState;
     _index = 0;
 }
 
-bool SimpleDevice::parse(const uint8_t* buffer, uint8_t bytes) {
+bool SimpleAdapter::parse(const uint8_t* buffer, uint8_t bytes) {
     if (bytes > 0) {    
         _command = (Command)(buffer[0] >> 6);
         _index = 0;
@@ -21,12 +21,12 @@ bool SimpleDevice::parse(const uint8_t* buffer, uint8_t bytes) {
                 return true;
             }
 
-            case Command::GetDetails: {
+            case Command::GetValue: {
                 _index = buffer[0] & 0x3F;
                 return true;
             }
 
-            case Command::SetDetails: {
+            case Command::SetValue: {
                 _index = buffer[0] & 0x3F;
 
                 int8_t len = _model.getDetailsSize(_index);            // get size expected
@@ -38,8 +38,13 @@ bool SimpleDevice::parse(const uint8_t* buffer, uint8_t bytes) {
                 return true;                
             }
 
-            case Command::Reset: {
+            case Command::ResetValues: {
                 _model.reset();
+                return true;
+            }
+
+            case Command::ResetDevice: {
+                _model.reboot();
                 return true;
             }
 
@@ -51,7 +56,7 @@ bool SimpleDevice::parse(const uint8_t* buffer, uint8_t bytes) {
     return false;
 }
 
-int16_t SimpleDevice::prepareResponse(uint8_t* buffer, uint8_t maxLen) {
+int16_t SimpleAdapter::prepareResponse(uint8_t* buffer, uint8_t maxLen) {
     switch (_command) {
         case Command::GetState: {
             if (maxLen < 2) {
@@ -64,7 +69,7 @@ int16_t SimpleDevice::prepareResponse(uint8_t* buffer, uint8_t maxLen) {
             return 2;
         }
 
-        case Command::GetDetails: {
+        case Command::GetValue: {
             int8_t len = _model.getDetailsSize(_index);
             if ((len <= 0) || (len > (int8_t)maxLen)) {
                 return -1;

@@ -1,12 +1,11 @@
-#ifndef __AbstractHost_h__
-#define __AbstractHost_h__
+#ifndef __AbstractDevice_h__
+#define __AbstractDevice_h__
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <ClassLogger.h>
-#include <i2c/I2CAddressProvider.h>
+#include <Logger.h>
 #include <i2c/util/Checksum.h>
-#include <i2c/I2CHostHandler.h>
+#include <i2c/I2CDeviceAdapter.h>
 
 using namespace ravensnight::logging;
 namespace ravensnight::i2c {
@@ -19,22 +18,20 @@ namespace ravensnight::i2c {
     #define I2C_RESPONSE_BUFFER_SIZE 64
     #endif 
 
-    class AbstractHost {
+    class AbstractDevice {
 
         private:
 
-            static ClassLogger _logger;
+            static Logger _logger;
 
-            I2CHostHandler* _handler = 0;
-            bool            _useChecksum = true;
+            I2CDeviceAdapter* _adapter = 0;
+            bool  _useChecksum = true;
 
             ravensnight::i2c::util::Checksum  _checksum;
 
         protected:
 
-            AbstractHost();            
-
-            virtual bool install(uint8_t hostAddr) = 0;
+            AbstractDevice();            
 
         public:
 
@@ -51,7 +48,7 @@ namespace ravensnight::i2c {
             /**
              * Set the in/out handler.
              */
-            void setHandler(I2CHostHandler* handler);
+            void setAdapter(I2CDeviceAdapter* adapter);
 
             /**
              * Handle some data received from wire
@@ -68,7 +65,8 @@ namespace ravensnight::i2c {
             /**
              * Install and start the I2C host.
              */
-            bool setup(I2CAddressProvider& addr);
+            virtual bool install(uint8_t addr) = 0;
+        
     };
 
 }

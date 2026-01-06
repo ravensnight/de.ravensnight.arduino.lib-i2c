@@ -1,25 +1,34 @@
-#ifdef I2C_WIRE
+#include <i2c/configure.h>
+#if I2C_IMPL == 1
 
-#include <i2c/wire/WireClient.h>
+#include <assert.h>
+#include <i2c/wire/WireController.h>
 #include <i2c/LoggerConfig.h>
 
 namespace ravensnight::i2c::wire {
 
-WireClient::WireClient(TwoWire* wire) {
+Logger WireController::_logger(LC_I2C);
+
+WireController::WireController(TwoWire* wire) {
+    assert(wire != 0);
+
     _i2c = wire;
     _hostAddr = 0x00;
 }
 
-void WireClient::setup(uint8_t hostAddr) {
-    if (_i2c == 0) return;
-
+void WireController::connect(uint8_t hostAddr) {
     _hostAddr = hostAddr;
     _i2c->begin();
 }
 
-bool WireClient::start(bool write) {    
-    if (_i2c == 0) return false;
-    
+bool WireController::probe(uint8_t addr) {
+    _i2c->beginTransmission(addr);
+    uint8_t res = _i2c->endTransmission();
+
+    return (res == 0);
+}
+
+bool WireController::start(bool write) {        
     if (write) {
         _i2c->beginTransmission(_hostAddr);
         _state = State::write;
@@ -33,9 +42,7 @@ bool WireClient::start(bool write) {
     return true;
 }
 
-int16_t WireClient::read(uint8_t* buffer, uint8_t len) {
-    if (_i2c == 0) return -1;
-
+int16_t WireController::read(uint8_t* buffer, uint8_t len) {
     if (_state != State::read) {
         _logger.error("Invalid state. Cannot start reading.");
         return -1;
@@ -65,7 +72,7 @@ int16_t WireClient::read(uint8_t* buffer, uint8_t len) {
     return pos;
 }
 
-int16_t WireClient::write(const uint8_t* buffer, uint8_t len) {
+int16_t WireController::write(const uint8_t* buffer, uint8_t len) {
     if (_state != State::write) {
         _logger.error("Invalid state. Cannot start writing.");
         return -1;
@@ -85,9 +92,7 @@ int16_t WireClient::write(const uint8_t* buffer, uint8_t len) {
     return num;
 }
 
-void WireClient::stop() {
-    if (_i2c == 0) return;
-
+void WireController::stop() {
     if (_state == State::write) {
         _i2c->endTransmission(true);
     }
@@ -95,8 +100,6 @@ void WireClient::stop() {
     _state = State::idle;
 }
 
-ClassLogger WireClient::_logger(LC_I2C);
-
 }
 
-#endif // I2C_WIRE
+#endif // I2C_IMPL == 1

@@ -3,11 +3,11 @@
 
 #include <Arduino.h>
 
-#include <i2c/util/SimpleDeviceModel.h>
+#include <i2c/util/SimpleAdapterModel.h>
 
 #define BUFFER_LEN 10
 
-class Model : public ravensnight::i2c::util::SimpleDeviceModel {
+class Model : public ravensnight::i2c::util::SimpleAdapterModel {
 
     private:
 
@@ -42,6 +42,10 @@ class Model : public ravensnight::i2c::util::SimpleDeviceModel {
          */
         void reset();
 
+        /**
+         * Reset the device
+         */
+        void reboot();
 };
 
 
