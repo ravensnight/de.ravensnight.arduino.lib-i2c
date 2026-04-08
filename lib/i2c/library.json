@@ -1,14 +1,13 @@
 {
   "name": "ravensnight lib-i2c",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Defines a helper for handling I2C / TWI data.",
   "keywords": "i2c, twowire, helper, avr, atmega",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/ravensnight/de.ravensnight.arduino.lib-i2c"
-  }, 
-  "authors":
-  [
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ravensnight/de.ravensnight.arduino.lib-i2c"
+  },
+  "authors": [
     {
       "name": "ravensnight",
       "email": "ravensnight@hoheisels-welt.de",
@@ -26,7 +25,9 @@
       "version": "https://github.com/ravensnight/de.ravensnight.arduino.lib-utils.git#lib-utils-v1.7.0"
     }
   ],
-
   "frameworks": "arduino",
-  "platforms": [ "atmelavr", "espressif32" ]
+  "platforms": [
+    "atmelavr",
+    "espressif32"
+  ]
 }
