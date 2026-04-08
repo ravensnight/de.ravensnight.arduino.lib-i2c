@@ -19,13 +19,11 @@
   "dependencies": [
     {
       "name": "ravensnight lib-logging",
-      "version": "1.6.1",
-      "platforms": ["atmelavr", "espressif32"]
+      "version": "https://github.com/ravensnight/de.ravensnight.arduino.lib-logging.git#lib-logging-v1.7.0"
     },
     {
       "name": "ravensnight lib-utils",
-      "version": "1.6.0",
-      "platforms": ["atmelavr", "espressif32"]
+      "version": "https://github.com/ravensnight/de.ravensnight.arduino.lib-utils.git#lib-utils-v1.7.0"
     }
   ],
 
