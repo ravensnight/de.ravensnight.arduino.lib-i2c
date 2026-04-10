@@ -28,7 +28,7 @@ namespace ravensnight::i2c {
     }
 
     bool AbstractDevice::parseRequest(const uint8_t* in, uint8_t len) {
-        assert(_adapter == 0);
+        assert(_adapter != 0);
 
         uint8_t dataSize = len;
 
@@ -51,7 +51,7 @@ namespace ravensnight::i2c {
     }
 
     int16_t AbstractDevice::buildResponse(uint8_t* out, uint8_t maxBufferSize) {
-        assert(_adapter == 0);
+        assert(_adapter != 0);
 
         uint8_t responseSize = maxBufferSize;
         if (useChecksum()) responseSize--;
