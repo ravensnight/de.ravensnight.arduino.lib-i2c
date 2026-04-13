@@ -28,14 +28,18 @@ namespace ravensnight::logging {
     I2CDevice device(&Wire);
 
     #ifdef ESP32
-    #define PIN_I2C_SCL GPIO_NUM_5
-    #define PIN_I2C_SDA GPIO_NUM_4
+    #define PIN_I2C_SCL GPIO_NUM_9
+    #define PIN_I2C_SDA GPIO_NUM_10
     #endif
 #endif
 
 SerialLogAdapter logAdapter;
 
-uint8_t addr = 0x01;
+#ifndef AVR_ADDR
+#define AVR_ADDR 0x01
+#endif
+
+uint8_t addr = AVR_ADDR;
 
 Model model;
 SimpleAdapter deviceAdapter(model);

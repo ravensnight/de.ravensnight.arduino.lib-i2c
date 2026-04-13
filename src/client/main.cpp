@@ -25,8 +25,8 @@ namespace ravensnight::logging {
     I2CController client(&Wire);
 
     #ifdef ESP32
-        #define PIN_I2C_SCL GPIO_NUM_5
-        #define PIN_I2C_SDA GPIO_NUM_4
+        #define PIN_I2C_SCL GPIO_NUM_9
+        #define PIN_I2C_SDA GPIO_NUM_10
     #endif
 #endif
 
